@@ -1,7 +1,6 @@
 package com.jobportal.config.security.custom;
 
 import com.jobportal.dto.auth.UserAuthDto;
-import com.jobportal.service.authService.UserService;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;

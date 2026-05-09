@@ -27,7 +27,6 @@ public class DateGenerator {
     private static final String START_TIME_OF_DAY = "00:00:00.000000";
     private static final String FINAL_FORMAT = "%s %s";
     private static final String OVERDUE_TIME = "12:30:00.000000";
-    private static final String CURRENT_TIME_FORMAT = "hh:mm:ss a";
     private static final String TIME_ZONE_UTC = "UTC";
     private static final String TIME_ZONE_ASIA_COLOMBO = "IST";
 

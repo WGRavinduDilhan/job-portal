@@ -41,6 +41,7 @@ public class Applicant implements CommonUserAuth {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updated;
 
+    @Builder.Default
     @OneToMany(mappedBy = "applicant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Application> applications = new ArrayList<>();
 }

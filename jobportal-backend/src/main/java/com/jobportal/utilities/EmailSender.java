@@ -25,11 +25,9 @@ public class EmailSender {
     @Value("${mail.from}")
     private String mailFrom;
 
-    private final Environment environment;
     private final JavaMailSender javaMailSender;
 
-    public EmailSender(Environment environment, JavaMailSender javaMailSender) {
-        this.environment = environment;
+    public EmailSender(JavaMailSender javaMailSender) {
         this.javaMailSender = javaMailSender;
     }
 

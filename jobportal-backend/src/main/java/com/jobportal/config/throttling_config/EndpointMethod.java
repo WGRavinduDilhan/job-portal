@@ -5,10 +5,10 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 class EndpointMethod {
 
-    private final Class targetClass;
+    private final Class<?> targetClass;
     private final String targetMethod;
 
-    public EndpointMethod(Class targetClass, String targetMethod) {
+    public EndpointMethod(Class<?> targetClass, String targetMethod) {
         this.targetClass = targetClass;
         this.targetMethod = targetMethod;
     }
@@ -17,7 +17,7 @@ class EndpointMethod {
         return targetMethod;
     }
 
-    public Class getTargetClass() {
+    public Class<?> getTargetClass() {
         return targetClass;
     }
 

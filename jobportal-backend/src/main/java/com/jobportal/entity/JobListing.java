@@ -19,6 +19,7 @@ public class JobListing {
     private String location;
     private String jobType;     // e.g. "Full-time", "Internship"
     private String requirements;
+    @Builder.Default
     private boolean isActive = true;
 
     @JsonFormat(pattern = "dd-MM-yyyy")
@@ -33,6 +34,7 @@ public class JobListing {
     @JoinColumn(nullable = false)
     private Company company;
 
+    @Builder.Default
     @OneToMany(mappedBy = "jobListing", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Application> applications = new ArrayList<>();
 }
