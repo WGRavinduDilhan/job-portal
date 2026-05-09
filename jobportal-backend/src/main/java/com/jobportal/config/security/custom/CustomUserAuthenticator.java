@@ -32,7 +32,6 @@ public class CustomUserAuthenticator {
             log.info("\nuser id matches with id: {}", id);
 
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("\nUnauthorized token: {}\n", e.getMessage());
             throw new CustomAccessDeniedException(403, AppConstants.DetailConstants.FORBIDDEN_RESOURCE);
         }
@@ -53,7 +52,6 @@ public class CustomUserAuthenticator {
             log.info("\nuser id matches with mobile: {}", mobile);
 
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("\nUnauthorized token: {}\n", e.getMessage());
             throw new CustomAccessDeniedException(403, AppConstants.DetailConstants.FORBIDDEN_RESOURCE);
         }
@@ -100,7 +98,6 @@ public class CustomUserAuthenticator {
             }
             /* ~~~~~~~~~~~ Decode JWT ~~~~~~~~~~~*/
             String[] split_string = jwtToken.split("\\.");
-            String base64EncodedHeader = split_string[0];
             String base64EncodedBody = split_string[1];
 
             /*~~~~~~~~~ JWT Header ~~~~~~~*/

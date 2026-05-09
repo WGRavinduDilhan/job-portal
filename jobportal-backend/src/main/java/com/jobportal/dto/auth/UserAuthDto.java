@@ -6,7 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
 
-public class UserAuthDto extends User implements UserDetails {
+public class UserAuthDto extends User {
 
     private long userId;
     private CommonUserAuth userDetails;

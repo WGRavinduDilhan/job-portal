@@ -42,6 +42,7 @@ public class Company implements CommonUserAuth {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updated;
 
+    @Builder.Default
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<JobListing> jobListings = new ArrayList<>();
 }
