@@ -1,5 +1,6 @@
 package com.jobportal.service;
 
+import com.jobportal.dto.application.ApplicationResDto;
 import com.jobportal.dto.job.JobReqDto;
 import com.jobportal.dto.job.JobResDto;
 import java.util.List;

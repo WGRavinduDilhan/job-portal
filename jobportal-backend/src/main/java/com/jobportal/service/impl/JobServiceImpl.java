@@ -1,5 +1,6 @@
 package com.jobportal.service.impl;
 
+import com.jobportal.dto.application.ApplicationResDto;
 import com.jobportal.dto.job.*;
 import com.jobportal.entity.*;
 import com.jobportal.enums.*;
