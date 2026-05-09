@@ -1,5 +1,6 @@
 package com.jobportal.service.impl;
 
+import com.jobportal.dto.application.ApplicationResDto;
 import com.jobportal.dto.job.*;
 import com.jobportal.entity.*;
 import com.jobportal.enums.*;
@@ -35,6 +36,16 @@ public class JobServiceImpl implements JobService {
                 dto.setCompanyId(job.getCompany().getId());
                 return dto;
             }).collect(Collectors.toList());
+    }
+
+    @Override
+    public JobResDto getJobById(Long id) {
+        JobListing job = jobListingRepository.findById(id)
+            .orElseThrow(() -> new CustomServiceException("Job not found"));
+        JobResDto dto = modelMapper.map(job, JobResDto.class);
+        dto.setCompanyName(job.getCompany().getCompanyName());
+        dto.setCompanyId(job.getCompany().getId());
+        return dto;
     }
 
     @Override
@@ -104,5 +115,22 @@ public class JobServiceImpl implements JobService {
         
         app.setUpdatedDate(new Date());
         applicationRepository.save(app);
+    }
+
+    @Override
+    public List<ApplicationResDto> getApplicantsForJob(Long jobId) {
+        return applicationRepository.findAllByJobListingId(jobId).stream()
+            .map(app -> {
+                ApplicationResDto dto = new ApplicationResDto();
+                dto.setId(app.getId());
+                dto.setJobTitle(app.getJobListing().getTitle());
+                dto.setCompanyName(app.getJobListing().getCompany().getCompanyName());
+                dto.setStatus(app.getStatus().name());
+                dto.setAppliedDate(app.getAppliedDate() != null ? app.getAppliedDate().toString() : "");
+                dto.setApplicantName(app.getApplicant().getUserName());
+                dto.setApplicantEmail(app.getApplicant().getEmail());
+                dto.setApplicantId(app.getApplicant().getId());
+                return dto;
+            }).collect(Collectors.toList());
     }
 }
