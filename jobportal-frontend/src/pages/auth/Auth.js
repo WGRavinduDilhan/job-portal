@@ -1,187 +1,159 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { toast } from 'react-toastify';
-import api from '../../utilities/api';
-import 'animate.css';
-import { PersonCircle, Building, Envelope, Lock, Person } from 'react-bootstrap-icons';
 
-const Auth = () => {
-    const [isLogin, setIsLogin] = useState(true);
-    const [role, setRole] = useState('applicant'); // 'applicant' or 'company'
-    const [formData, setFormData] = useState({
-        userName: '',
-        email: '',
-        password: '',
-        companyName: '',
-        contactNumber: ''
-    });
-    const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
+const BASE_URL = process.env.REACT_APP_API_URL;
 
-    const handleInputChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
+// Base64 values for OAuth2 clients:
+// "applicant:password" → YXBwbGljYW50OnBhc3N3b3Jk
+// "company:password"   → Y29tcGFueTpwYXNzd29yZA==
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        try {
-            if (isLogin) {
-                // Login Logic
-                const loginData = new URLSearchParams();
-                loginData.append('username', formData.userName);
-                loginData.append('password', formData.password);
-                loginData.append('grant_type', 'password');
+export default function Auth() {
+  const navigate = useNavigate();
+  const [authMode, setAuthMode] = useState('signin');
+  const [role, setRole] = useState('APPLICANT');
+  const [userName, setUserName] = useState('');
+  const [password, setPassword] = useState('');
+  const [newUserName, setNewUserName] = useState('');
+  const [newEmail, setNewEmail] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [university, setUniversity] = useState('');
+  const [degree, setDegree] = useState('');
+  const [companyName, setCompanyName] = useState('');
+  const [industry, setIndustry] = useState('');
 
-                const response = await api.post('/oauth/token', loginData, {
-                    headers: {
-                        'Authorization': 'Basic ' + btoa(role === 'applicant' ? 'applicant:password' : 'company:password'),
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    }
-                });
+  const fireStorageEvent = () => window.dispatchEvent(new Event('storage'));
 
-                localStorage.setItem('ACCESS_TOKEN', response.data.access_token);
-                localStorage.setItem('USER_ROLE', role);
-                window.dispatchEvent(new Event('storage')); // Trigger update in App.js
-                
-                toast.success('Welcome back!');
-                navigate(role === 'applicant' ? '/dashboard' : '/company/dashboard');
-            } else {
-                // Signup Logic
-                const endpoint = role === 'applicant' ? '/applicant/signup' : '/company/signup';
-                await api.post(endpoint, formData);
-                toast.success('Registration successful! Please check your email for verification.');
-                setIsLogin(true);
-            }
-        } catch (error) {
-            const msg = error.response?.data?.message || 'Something went wrong';
-            toast.error(msg);
-        } finally {
-            setLoading(false);
+  const LoginHandler = async (e) => {
+    e.preventDefault();
+    if (!userName || !password) { toast.warn('Please fill all fields'); return; }
+    const data = new FormData();
+    data.append('username', userName);
+    data.append('password', password);
+    data.append('grant_type', 'password');
+    
+    // Updated client keys to match backend: applicant:password and company:password
+    const clientKey = role === 'COMPANY' ? 'Y29tcGFueTpwYXNzd29yZA==' : 'YXBwbGljYW50OnBhc3N3b3Jk';
+    
+    try {
+      const res = await axios.post(`${BASE_URL}/oauth/token`, data, {
+        headers: { Authorization: `Basic ${clientKey}`, 'Content-Type': 'multipart/form-data' }
+      });
+      if (res?.data?.access_token) {
+        localStorage.setItem('ACCESS_TOKEN', res.data.access_token);
+        localStorage.setItem('User', JSON.stringify(res.data.user));
+        fireStorageEvent();
+        const userRole = res.data.user?.userDetails?.role;
+        navigate(userRole === 'COMPANY' ? '/company/dashboard' : '/dashboard');
+      }
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Login failed');
+    }
+  };
+
+  const SignUpHandler = () => {
+    if (!newUserName || !newEmail || !newPassword) { toast.warn('Fill all fields'); return; }
+    const url = role === 'COMPANY' ? `${BASE_URL}/company/signup` : `${BASE_URL}/applicant/signup`;
+    const body = role === 'COMPANY'
+      ? { userName: newUserName, email: newEmail, password: newPassword, companyName, industry }
+      : { userName: newUserName, email: newEmail, password: newPassword, university, degree };
+    axios.post(url, body)
+      .then(res => {
+        if (res?.data?.success) {
+          toast.success('Signed up! Check your email to verify.');
+          setAuthMode('signin');
+        } else {
+          toast.error(res.data.message);
         }
-    };
+      })
+      .catch(err => toast.error(err?.response?.data?.message || 'Sign up failed'));
+  };
 
+  if (authMode === 'signin') {
     return (
-        <div className="auth-container d-flex align-items-center justify-content-center min-vh-100 bg-light">
-            <div className="auth-card card shadow-lg border-0 animate__animated animate__fadeIn" style={{ maxWidth: '450px', width: '100%', borderRadius: '1.5rem', overflow: 'hidden' }}>
-                <div className="card-header bg-primary text-white text-center py-4 border-0" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-                    <h2 className="fw-bold mb-0">{isLogin ? 'Welcome Back' : 'Join JobPortal'}</h2>
-                    <p className="small opacity-75 mb-0">{isLogin ? 'Sign in to your account' : 'Start your journey with us'}</p>
-                </div>
-                
-                <div className="card-body p-4">
-                    {/* Role Selector */}
-                    <div className="d-flex justify-content-center mb-4 p-1 bg-light rounded-pill">
-                        <button 
-                            className={`btn rounded-pill px-4 flex-grow-1 ${role === 'applicant' ? 'btn-primary shadow' : 'btn-link text-muted text-decoration-none'}`}
-                            onClick={() => setRole('applicant')}
-                            style={role === 'applicant' ? { background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', border: 'none' } : {}}
-                        >
-                            <PersonCircle className="me-2" /> Applicant
-                        </button>
-                        <button 
-                            className={`btn rounded-pill px-4 flex-grow-1 ${role === 'company' ? 'btn-primary shadow' : 'btn-link text-muted text-decoration-none'}`}
-                            onClick={() => setRole('company')}
-                            style={role === 'company' ? { background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', border: 'none' } : {}}
-                        >
-                            <Building className="me-2" /> Company
-                        </button>
-                    </div>
-
-                    <form onSubmit={handleSubmit} className="animate__animated animate__fadeInUp animate__faster">
-                        <div className="mb-3">
-                            <label className="form-label small text-muted">Username</label>
-                            <div className="input-group">
-                                <span className="input-group-text bg-white border-end-0"><Person /></span>
-                                <input 
-                                    type="text" name="userName" className="form-control border-start-0 ps-0" 
-                                    placeholder="Enter username" required onChange={handleInputChange} 
-                                />
-                            </div>
-                        </div>
-
-                        {!isLogin && (
-                            <>
-                                <div className="mb-3">
-                                    <label className="form-label small text-muted">Email Address</label>
-                                    <div className="input-group">
-                                        <span className="input-group-text bg-white border-end-0"><Envelope /></span>
-                                        <input 
-                                            type="email" name="email" className="form-control border-start-0 ps-0" 
-                                            placeholder="name@example.com" required onChange={handleInputChange} 
-                                        />
-                                    </div>
-                                </div>
-                                {role === 'company' && (
-                                    <div className="mb-3">
-                                        <label className="form-label small text-muted">Company Name</label>
-                                        <div className="input-group">
-                                            <span className="input-group-text bg-white border-end-0"><Building /></span>
-                                            <input 
-                                                type="text" name="companyName" className="form-control border-start-0 ps-0" 
-                                                placeholder="e.g. Acme Corp" required onChange={handleInputChange} 
-                                            />
-                                        </div>
-                                    </div>
-                                )}
-                            </>
-                        )}
-
-                        <div className="mb-4">
-                            <label className="form-label small text-muted">Password</label>
-                            <div className="input-group">
-                                <span className="input-group-text bg-white border-end-0"><Lock /></span>
-                                <input 
-                                    type="password" name="password" className="form-control border-start-0 ps-0" 
-                                    placeholder="••••••••" required onChange={handleInputChange} 
-                                />
-                            </div>
-                        </div>
-
-                        <button 
-                            type="submit" 
-                            className="btn btn-primary w-100 py-2 fw-bold rounded-pill shadow-sm"
-                            style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', border: 'none' }}
-                            disabled={loading}
-                        >
-                            {loading ? (
-                                <span className="spinner-border spinner-border-sm me-2"></span>
-                            ) : (
-                                isLogin ? 'Sign In' : 'Create Account'
-                            )}
-                        </button>
-                    </form>
-
-                    <div className="text-center mt-4">
-                        <p className="text-muted small">
-                            {isLogin ? "Don't have an account?" : "Already have an account?"}
-                            <button 
-                                className="btn btn-link p-0 ms-1 small fw-bold text-decoration-none"
-                                onClick={() => setIsLogin(!isLogin)}
-                            >
-                                {isLogin ? 'Sign Up' : 'Sign In'}
-                            </button>
-                        </p>
-                    </div>
-                </div>
+      <div className="Auth-form-container d-flex align-items-center justify-content-center min-vh-100 bg-light">
+        <form className="Auth-form card shadow p-4" style={{maxWidth:'400px', width:'100%'}}>
+          <div className="Auth-form-content">
+            <h3 className="Auth-form-title text-center mb-4">Sign In</h3>
+            <div className="form-group mt-3">
+              <label>Login as</label>
+              <select className="form-control mt-1" value={role} onChange={e => setRole(e.target.value)}>
+                <option value="APPLICANT">Applicant (Graduate)</option>
+                <option value="COMPANY">Company (Recruiter)</option>
+              </select>
             </div>
-            
-            <style>{`
-                .auth-container {
-                    background: #f8f9fa;
-                    background-image: radial-gradient(#667eea11 2px, transparent 2px);
-                    background-size: 30px 30px;
-                }
-                .form-control:focus {
-                    box-shadow: none;
-                    border-color: #667eea;
-                }
-                .input-group-text {
-                    color: #764ba2;
-                }
-            `}</style>
-        </div>
+            <div className="form-group mt-3">
+              <label>Username</label>
+              <input type="text" className="form-control mt-1" value={userName}
+                onChange={e => setUserName(e.target.value)} placeholder="Username" />
+            </div>
+            <div className="form-group mt-3">
+              <label>Password</label>
+              <input type="password" className="form-control mt-1" value={password}
+                onChange={e => setPassword(e.target.value)} placeholder="Password" />
+            </div>
+            <div className="d-grid gap-2 mt-4">
+              <button className="btn btn-dark" onClick={LoginHandler}>Sign In</button>
+            </div>
+            <div className="text-center mt-3">
+              <span className="link-text" style={{cursor:'pointer'}} onClick={() => setAuthMode('signup')}>
+                New here? <u className="text-primary">Sign Up</u>
+              </span>
+            </div>
+          </div>
+        </form>
+      </div>
     );
-};
+  }
 
-export default Auth;
+  return (
+    <div className="Auth-form-container d-flex align-items-center justify-content-center min-vh-100 bg-light">
+      <form className="Auth-form card shadow p-4" style={{maxWidth:'450px', width:'100%'}}>
+        <div className="Auth-form-content">
+          <h3 className="Auth-form-title text-center mb-4">Sign Up</h3>
+          <div className="form-group mt-2">
+            <label>Registering as</label>
+            <select className="form-control mt-1" value={role} onChange={e => setRole(e.target.value)}>
+              <option value="APPLICANT">Graduate / Applicant</option>
+              <option value="COMPANY">Company / Recruiter</option>
+            </select>
+          </div>
+          <div className="form-group mt-2"><label>Username</label>
+            <input type="text" className="form-control mt-1" value={newUserName}
+              onChange={e => setNewUserName(e.target.value)} /></div>
+          <div className="form-group mt-2"><label>Email</label>
+            <input type="email" className="form-control mt-1" value={newEmail}
+              onChange={e => setNewEmail(e.target.value)} /></div>
+          <div className="form-group mt-2"><label>Password</label>
+            <input type="password" className="form-control mt-1" value={newPassword}
+              onChange={e => setNewPassword(e.target.value)} /></div>
+          {role === 'APPLICANT' && <>
+            <div className="form-group mt-2"><label>University</label>
+              <input type="text" className="form-control mt-1" value={university}
+                onChange={e => setUniversity(e.target.value)} /></div>
+            <div className="form-group mt-2"><label>Degree</label>
+              <input type="text" className="form-control mt-1" value={degree}
+                onChange={e => setDegree(e.target.value)} /></div>
+          </>}
+          {role === 'COMPANY' && <>
+            <div className="form-group mt-2"><label>Company Name</label>
+              <input type="text" className="form-control mt-1" value={companyName}
+                onChange={e => setCompanyName(e.target.value)} /></div>
+            <div className="form-group mt-2"><label>Industry</label>
+              <input type="text" className="form-control mt-1" value={industry}
+                onChange={e => setIndustry(e.target.value)} /></div>
+          </>}
+          <div className="d-grid gap-2 mt-4">
+            <button type="button" className="btn btn-primary" onClick={SignUpHandler}>Sign Up</button>
+          </div>
+          <div className="text-center mt-3">
+            <span style={{cursor:'pointer'}} onClick={() => setAuthMode('signin')}>
+              Already registered? <u className="text-primary">Sign In</u>
+            </span>
+          </div>
+        </div>
+      </form>
+    </div>
+  );
+}
