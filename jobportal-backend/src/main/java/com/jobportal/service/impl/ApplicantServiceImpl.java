@@ -34,7 +34,7 @@ public class ApplicantServiceImpl implements ApplicantService {
     private final PasswordEncoder passwordEncoder;
     private final EmailVerificationTokenGenerator emailVerificationTokenGenerator;
 
-    @Value("${game.frontend.base.url}")
+    @Value("${job.frontend.base.url}")
     private String frontendBaseUrl;
 
     @Override
@@ -54,7 +54,13 @@ public class ApplicantServiceImpl implements ApplicantService {
         applicant.setStatus(ActiveStatus.PENDING);
         applicant.setEmail_verified(AccountVerifyStatus.NOT_VERIFY);
         Applicant saved = applicantRepository.save(applicant);
-        sendVerificationEmail(saved);
+        
+        // Try sending email but don't fail the whole signup if it fails
+        try {
+            sendVerificationEmail(saved);
+        } catch (Exception e) {
+            log.error("Email failed but user was saved: {}", e.getMessage());
+        }
     }
 
     @Override
@@ -95,16 +101,23 @@ public class ApplicantServiceImpl implements ApplicantService {
     }
 
     private void sendVerificationEmail(Applicant applicant) {
+        String token = emailVerificationTokenGenerator.generate(applicant.getId(), applicant.getEmail());
+        String verifyUrl = frontendBaseUrl + "/register-complete?uid=" + token;
+        
+        // Log for testing
+        log.info("----------------------------------------------------------------");
+        log.info("VERIFICATION LINK FOR {}: {}", applicant.getEmail(), verifyUrl);
+        log.info("----------------------------------------------------------------");
+
         try {
-            String token = emailVerificationTokenGenerator.generate(applicant.getId(), applicant.getEmail());
-            String verifyUrl = frontendBaseUrl + "/register-complete?uid=" + token;
             String body = "<p>Hello " + applicant.getUserName() + ",</p><br/>"
                         + "<p>Click to verify your JobPortal account: <a href='" + verifyUrl + "'>Verify Email</a></p>";
             emailSender.sendSimpleEmail(applicant.getEmail(), "Verify your JobPortal email", body);
-            applicant.setCurrent_verify_token(token);
-            applicantRepository.save(applicant);
-        } catch (MessagingException e) {
-            throw new CustomServiceException(e.getMessage());
+        } catch (Exception e) {
+            log.warn("SMTP Server not available. User can still verify using the link in logs.");
         }
+        
+        applicant.setCurrent_verify_token(token);
+        applicantRepository.save(applicant);
     }
 }

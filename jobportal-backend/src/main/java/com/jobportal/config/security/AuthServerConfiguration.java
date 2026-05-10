@@ -39,7 +39,7 @@ public class AuthServerConfiguration extends AuthorizationServerConfigurerAdapte
         configurer.inMemory()
             // APPLICANT client
             .withClient(APPLICANT_ID)
-            .secret(passwordEncoder.encode(""))
+            .secret(passwordEncoder.encode("password"))
             .authorizedGrantTypes(GRANT_TYPE_PASSWORD, AUTHORIZATION_CODE, REFRESH_TOKEN, IMPLICIT)
             .scopes(SCOPE_READ, SCOPE_WRITE, TRUST)
             .accessTokenValiditySeconds(APPLICANT_ACCESS_TOKEN_VALIDITY_SECONDS)
@@ -47,7 +47,7 @@ public class AuthServerConfiguration extends AuthorizationServerConfigurerAdapte
             .and()
             // COMPANY client
             .withClient(COMPANY_ID)
-            .secret(passwordEncoder.encode(""))
+            .secret(passwordEncoder.encode("password"))
             .authorizedGrantTypes(GRANT_TYPE_PASSWORD, AUTHORIZATION_CODE, REFRESH_TOKEN, IMPLICIT)
             .scopes(SCOPE_READ, SCOPE_WRITE, TRUST)
             .accessTokenValiditySeconds(COMPANY_ACCESS_TOKEN_VALIDITY_SECONDS)
