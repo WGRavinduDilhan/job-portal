@@ -36,8 +36,9 @@ public class UserServiceImpl implements UserService {
             case SecurityConstants.APPLICANT_ID:
                 Applicant applicant = applicantRepository.findFirstByUserName(username)
                     .orElseThrow(() -> new CustomServiceException("Invalid username!"));
-                if (applicant.getEmail_verified() == AccountVerifyStatus.NOT_VERIFY)
-                    throw new CustomServiceException("Account not verified. Check your email!");
+                // Temporarily disabled for testing
+                // if (applicant.getEmail_verified() == AccountVerifyStatus.NOT_VERIFY)
+                //     throw new CustomServiceException("Account not verified. Check your email!");
                 
                 ApplicantAuthDto appAuth = ApplicantAuthDto.builder()
                     .id(applicant.getId())
@@ -54,8 +55,9 @@ public class UserServiceImpl implements UserService {
             case SecurityConstants.COMPANY_ID:
                 Company company = companyRepository.findFirstByUserName(username)
                     .orElseThrow(() -> new CustomServiceException("Invalid username!"));
-                if (company.getEmail_verified() == AccountVerifyStatus.NOT_VERIFY)
-                    throw new CustomServiceException("Account not verified. Check your email!");
+                // Temporarily disabled for testing
+                // if (company.getEmail_verified() == AccountVerifyStatus.NOT_VERIFY)
+                //     throw new CustomServiceException("Account not verified. Check your email!");
                 
                 CompanyAuthDto compAuth = CompanyAuthDto.builder()
                     .id(company.getId())

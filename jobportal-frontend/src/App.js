@@ -14,6 +14,7 @@ import MyApplications from './pages/applicant/MyApplications';
 import CompanyDashboard from './pages/company/CompanyDashboard';
 import PostJob from './pages/company/PostJob';
 import ApplicantPipeline from './pages/company/ApplicantPipeline';
+import Landing from './pages/Landing';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -30,7 +31,7 @@ function App() {
       <ToastContainer position="top-right" autoClose={3000} />
       {isLoggedIn && <NavBar />}
       <Routes>
-        <Route path="/"                 element={<Auth />} />
+        <Route path="/"                 element={<Landing />} />
         <Route path="/auth"             element={<Auth />} />
         <Route path="/register-complete" element={<Verification />} />
 

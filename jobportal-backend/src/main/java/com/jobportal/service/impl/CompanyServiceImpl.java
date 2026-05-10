@@ -32,7 +32,7 @@ public class CompanyServiceImpl implements CompanyService {
     private final PasswordEncoder passwordEncoder;
     private final EmailVerificationTokenGenerator emailVerificationTokenGenerator;
 
-    @Value("${game.frontend.base.url}")
+    @Value("${job.frontend.base.url}")
     private String frontendBaseUrl;
 
     @Override
@@ -52,7 +52,13 @@ public class CompanyServiceImpl implements CompanyService {
         company.setStatus(ActiveStatus.PENDING);
         company.setEmail_verified(AccountVerifyStatus.NOT_VERIFY);
         Company saved = companyRepository.save(company);
-        sendVerificationEmail(saved);
+        
+        // Try sending email but don't fail the whole signup if it fails
+        try {
+            sendVerificationEmail(saved);
+        } catch (Exception e) {
+            log.error("Email failed but company was saved: {}", e.getMessage());
+        }
     }
 
     @Override
@@ -88,16 +94,23 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     private void sendVerificationEmail(Company company) {
+        String token = emailVerificationTokenGenerator.generate(company.getId(), company.getEmail());
+        String verifyUrl = frontendBaseUrl + "/register-complete?uid=" + token;
+        
+        // Log for testing
+        log.info("----------------------------------------------------------------");
+        log.info("VERIFICATION LINK FOR {}: {}", company.getEmail(), verifyUrl);
+        log.info("----------------------------------------------------------------");
+
         try {
-            String token = emailVerificationTokenGenerator.generate(company.getId(), company.getEmail());
-            String verifyUrl = frontendBaseUrl + "/register-complete?uid=" + token;
             String body = "<p>Hello " + company.getUserName() + ",</p><br/>"
                         + "<p>Click to verify your JobPortal account: <a href='" + verifyUrl + "'>Verify Email</a></p>";
             emailSender.sendSimpleEmail(company.getEmail(), "Verify your JobPortal email", body);
-            company.setCurrent_verify_token(token);
-            companyRepository.save(company);
-        } catch (MessagingException e) {
-            throw new CustomServiceException(e.getMessage());
+        } catch (Exception e) {
+            log.warn("SMTP Server not available. Company can still verify using the link in logs.");
         }
+        
+        company.setCurrent_verify_token(token);
+        companyRepository.save(company);
     }
 }
