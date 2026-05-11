@@ -20,7 +20,7 @@ export default function ApplicantPipeline() {
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_URL}/company/jobs/${jobId}/applicants`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('ACCESS_TOKEN')}` }
-    }).then(res => { if (res.data.success) setApplicants(res.data.body || []); })
+    }).then(res => { if (res.data.success) setApplicants(res.data.data || []); })
       .finally(() => setLoading(false));
   }, [jobId]);
 

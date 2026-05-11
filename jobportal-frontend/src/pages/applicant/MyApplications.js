@@ -14,7 +14,7 @@ export default function MyApplications() {
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_URL}/applicant/my-applications`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('ACCESS_TOKEN')}` }
-    }).then(res => { if (res.data.success) setApplications(res.data.body || []); })
+    }).then(res => { if (res.data.success) setApplications(res.data.data || []); })
       .finally(() => setLoading(false));
   }, []);
 

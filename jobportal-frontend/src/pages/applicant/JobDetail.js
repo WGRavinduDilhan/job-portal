@@ -14,7 +14,7 @@ export default function JobDetail() {
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_URL}/jobs/${id}`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('ACCESS_TOKEN')}` }
-    }).then(res => { if (res.data.success) setJob(res.data.body); });
+    }).then(res => { if (res.data.success) setJob(res.data.data || []); });
   }, [id]);
 
   const applyNow = () => {

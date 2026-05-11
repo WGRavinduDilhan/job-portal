@@ -22,6 +22,9 @@ public class JobListing {
     @Builder.Default
     private boolean isActive = true;
 
+    @Enumerated(EnumType.STRING)
+    private com.jobportal.enums.ActiveStatus status;
+
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Temporal(TemporalType.DATE)
     private Date deadline;

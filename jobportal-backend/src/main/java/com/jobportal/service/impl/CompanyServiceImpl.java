@@ -102,6 +102,7 @@ public class CompanyServiceImpl implements CompanyService {
                 dto.setCompanyName(job.getCompany().getCompanyName());
                 dto.setCompanyId(job.getCompany().getId());
                 dto.setApplicantCount(applicationRepository.countByJobListingId(job.getId()));
+                dto.setActive(job.isActive());
                 return dto;
             }).collect(Collectors.toList());
         
