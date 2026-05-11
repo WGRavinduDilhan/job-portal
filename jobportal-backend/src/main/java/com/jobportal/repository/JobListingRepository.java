@@ -9,4 +9,5 @@ import java.util.List;
 public interface JobListingRepository extends JpaRepository<JobListing, Long> {
     List<JobListing> findAllByIsActiveTrue();
     List<JobListing> findAllByCompanyId(Long companyId);
+    long countByCompanyId(Long companyId);
 }

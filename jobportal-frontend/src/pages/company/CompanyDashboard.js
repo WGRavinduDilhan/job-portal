@@ -20,8 +20,8 @@ export default function CompanyDashboard() {
       try {
         const headers = { Authorization: `Bearer ${localStorage.getItem('ACCESS_TOKEN')}` };
         const res = await axios.get(`${process.env.REACT_APP_API_URL}/company/dashboard`, { headers });
-        if (res.data.success) {
-          setDashboardData(res.data.body);
+        if (res.data.success && res.data.data) {
+          setDashboardData(res.data.data);
         }
       } catch (err) {
         console.error('Failed to fetch dashboard data', err);

@@ -44,6 +44,7 @@ public class EmailSender {
         }
     }
 
+    @org.springframework.scheduling.annotation.Async
     public void sendSimpleEmail(String recipient, String subject, String content) throws MessagingException {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();

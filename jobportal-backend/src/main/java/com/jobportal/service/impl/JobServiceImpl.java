@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 @Log4j2
 @RequiredArgsConstructor
 @Service
+@org.springframework.transaction.annotation.Transactional
 public class JobServiceImpl implements JobService {
 
     private final JobListingRepository jobListingRepository;
@@ -29,7 +30,12 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public List<JobResDto> getAllActiveJobs() {
-        return jobListingRepository.findAllByIsActiveTrue().stream()
+        log.info("Fetching all active jobs for browse page...");
+        List<JobListing> jobs = jobListingRepository.findAll(); // Get all first for debugging
+        log.info("Total jobs in DB: {}", jobs.size());
+        
+        return jobs.stream()
+            .filter(JobListing::isActive)
             .map(job -> {
                 JobResDto dto = modelMapper.map(job, JobResDto.class);
                 dto.setCompanyName(job.getCompany().getCompanyName());
@@ -50,6 +56,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public JobResDto createJob(Long companyId, JobReqDto req) {
+        log.info("Creating job: {} for companyId: {}", req.getTitle(), companyId);
         Company company = companyRepository.findById(companyId)
             .orElseThrow(() -> new CustomServiceException("Company not found"));
         
@@ -58,6 +65,7 @@ public class JobServiceImpl implements JobService {
             try {
                 deadline = new SimpleDateFormat("yyyy-MM-dd").parse(req.getDeadline());
             } catch (ParseException e) {
+                log.error("Date parse error: {}", e.getMessage());
                 throw new CustomServiceException("Invalid deadline format. Use yyyy-MM-dd");
             }
         }
@@ -71,13 +79,25 @@ public class JobServiceImpl implements JobService {
             .deadline(deadline)
             .company(company)
             .isActive(true)
+            .status(com.jobportal.enums.ActiveStatus.ACTIVE)
             .createdAt(new Date())
             .build();
         
-        JobListing saved = jobListingRepository.save(job);
-        JobResDto res = modelMapper.map(saved, JobResDto.class);
+        JobListing saved = jobListingRepository.saveAndFlush(job);
+        
+        // Manual mapping to be safe
+        JobResDto res = new JobResDto();
+        res.setId(saved.getId());
+        res.setTitle(saved.getTitle());
+        res.setDescription(saved.getDescription());
+        res.setLocation(saved.getLocation());
+        res.setJobType(saved.getJobType());
+        res.setRequirements(saved.getRequirements());
+        res.setDeadline(saved.getDeadline() != null ? saved.getDeadline().toString() : "");
         res.setCompanyName(company.getCompanyName());
         res.setCompanyId(company.getId());
+        
+        log.info("Job created successfully with ID: {}", saved.getId());
         return res;
     }
 

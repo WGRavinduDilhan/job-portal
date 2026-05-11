@@ -1,6 +1,7 @@
 package com.jobportal.service.impl;
 
 import com.jobportal.dto.company.*;
+import com.jobportal.dto.job.JobResDto;
 import com.jobportal.entity.*;
 import com.jobportal.enums.*;
 import com.jobportal.exception.dto.CustomServiceException;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.*;
 import javax.mail.MessagingException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -27,6 +29,7 @@ public class CompanyServiceImpl implements CompanyService {
 
     private final CompanyRepository companyRepository;
     private final ApplicationRepository applicationRepository;
+    private final JobListingRepository jobListingRepository;
     private final ModelMapper modelMapper;
     private final EmailSender emailSender;
     private final PasswordEncoder passwordEncoder;
@@ -51,7 +54,7 @@ public class CompanyServiceImpl implements CompanyService {
         company.setPassword(passwordEncoder.encode(dto.getPassword()));
         company.setStatus(ActiveStatus.PENDING);
         company.setEmail_verified(AccountVerifyStatus.NOT_VERIFY);
-        Company saved = companyRepository.save(company);
+        Company saved = companyRepository.saveAndFlush(company);
         
         // Try sending email but don't fail the whole signup if it fails
         try {
@@ -87,9 +90,23 @@ public class CompanyServiceImpl implements CompanyService {
     @Override
     public Map<String, Object> getDashboard(Long companyId) {
         Map<String, Object> dashboard = new HashMap<>();
+        dashboard.put("activeListings", jobListingRepository.countByCompanyId(companyId));
         dashboard.put("totalApplications", applicationRepository.countByJobListingCompanyId(companyId));
         dashboard.put("shortlisted", applicationRepository.countByJobListingCompanyIdAndStatus(companyId, ApplicationStatus.SHORTLISTED));
         dashboard.put("offered",      applicationRepository.countByJobListingCompanyIdAndStatus(companyId, ApplicationStatus.OFFERED));
+        
+        List<JobListing> recentJobs = jobListingRepository.findAllByCompanyId(companyId);
+        List<JobResDto> jobDtos = recentJobs.stream()
+            .map(job -> {
+                JobResDto dto = modelMapper.map(job, JobResDto.class);
+                dto.setCompanyName(job.getCompany().getCompanyName());
+                dto.setCompanyId(job.getCompany().getId());
+                dto.setApplicantCount(applicationRepository.countByJobListingId(job.getId()));
+                return dto;
+            }).collect(Collectors.toList());
+        
+        dashboard.put("recentJobs", jobDtos);
+        
         return dashboard;
     }
 
