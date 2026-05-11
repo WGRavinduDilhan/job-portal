@@ -28,11 +28,17 @@ export default function PostJob() {
         'Content-Type': 'application/json'
       }
     }).then(res => {
+      console.log('Job Post Response:', res.data);
       if (res.data.success) {
         toast.success('Job posted successfully!');
         navigate('/company/dashboard');
+      } else {
+        toast.error(res.data.message || 'Failed to post job');
       }
-    }).catch(err => toast.error('Failed to post job'))
+    }).catch(err => {
+      console.error('Job Post Error:', err.response || err);
+      toast.error(err?.response?.data?.message || 'Failed to post job');
+    })
       .finally(() => setLoading(false));
   };
 

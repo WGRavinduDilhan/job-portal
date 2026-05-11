@@ -61,8 +61,15 @@ export default function Auth() {
     axios.post(url, body)
       .then(res => {
         if (res?.data?.success) {
-          toast.success('Signed up! Check your email to verify.');
+          toast.success('Signed up successfully! You can now sign in.');
           setAuthMode('signin');
+          setNewUserName('');
+          setNewEmail('');
+          setNewPassword('');
+          setUniversity('');
+          setDegree('');
+          setCompanyName('');
+          setIndustry('');
         } else {
           toast.error(res.data.message);
         }

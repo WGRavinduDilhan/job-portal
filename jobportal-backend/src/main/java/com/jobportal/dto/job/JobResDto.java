@@ -13,4 +13,5 @@ public class JobResDto {
     private String deadline;
     private String companyName;
     private Long   companyId;
+    private long   applicantCount;
 }

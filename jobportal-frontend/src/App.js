@@ -35,7 +35,8 @@ function App() {
         <Route path="/auth"             element={<Auth />} />
         <Route path="/register-complete" element={<Verification />} />
 
-        <Route path="/dashboard"        element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/dashboard"        element={<ProtectedRoute><DashboardRouter /></ProtectedRoute>} />
+        <Route path="/applicant/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/jobs"             element={<ProtectedRoute><JobList /></ProtectedRoute>} />
         <Route path="/jobs/:id"         element={<ProtectedRoute><JobDetail /></ProtectedRoute>} />
         <Route path="/my-applications"  element={<ProtectedRoute><MyApplications /></ProtectedRoute>} />
@@ -46,6 +47,14 @@ function App() {
       </Routes>
     </div>
   );
+}
+
+function DashboardRouter() {
+  const user = JSON.parse(localStorage.getItem('User') || '{}');
+  const userRole = user?.userDetails?.role;
+  const { Navigate } = require('react-router-dom');
+  if (userRole === 'COMPANY') return <Navigate to="/company/dashboard" replace />;
+  return <Dashboard />;
 }
 
 export default App;

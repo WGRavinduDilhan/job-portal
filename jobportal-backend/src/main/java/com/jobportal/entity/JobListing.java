@@ -22,11 +22,11 @@ public class JobListing {
     @Builder.Default
     private boolean isActive = true;
 
-    @JsonFormat(pattern = "dd-MM-yyyy")
-    @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    @Temporal(TemporalType.DATE)
     private Date deadline;
 
-    @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
 
