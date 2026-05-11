@@ -40,6 +40,7 @@ public class JobServiceImpl implements JobService {
                 JobResDto dto = modelMapper.map(job, JobResDto.class);
                 dto.setCompanyName(job.getCompany().getCompanyName());
                 dto.setCompanyId(job.getCompany().getId());
+                dto.setActive(job.isActive());
                 return dto;
             }).collect(Collectors.toList());
     }

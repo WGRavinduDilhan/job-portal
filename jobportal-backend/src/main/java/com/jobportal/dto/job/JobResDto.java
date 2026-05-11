@@ -14,4 +14,5 @@ public class JobResDto {
     private String companyName;
     private Long   companyId;
     private long   applicantCount;
+    private boolean active;
 }

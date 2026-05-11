@@ -13,7 +13,7 @@ export default function JobList() {
     axios.get(`${process.env.REACT_APP_API_URL}/jobs`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('ACCESS_TOKEN')}` }
     }).then(res => {
-      if (res.data.success) setJobs(res.data.body || []);
+      if (res.data.success) setJobs(res.data.data || []);
     }).finally(() => setLoading(false));
   }, []);
 
