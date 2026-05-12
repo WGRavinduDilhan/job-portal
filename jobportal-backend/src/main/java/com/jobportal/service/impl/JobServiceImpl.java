@@ -151,6 +151,13 @@ public class JobServiceImpl implements JobService {
                 dto.setApplicantName(app.getApplicant().getUserName());
                 dto.setApplicantEmail(app.getApplicant().getEmail());
                 dto.setApplicantId(app.getApplicant().getId());
+                dto.setApplicantBio(app.getApplicant().getBio());
+                dto.setApplicantSkills(app.getApplicant().getSkills());
+                dto.setApplicantResume(app.getApplicant().getResume());
+                dto.setApplicantResumeFileName(app.getApplicant().getResumeFileName());
+                dto.setUniversity(app.getApplicant().getUniversity());
+                dto.setDegree(app.getApplicant().getDegree());
+                dto.setApplicantProfilePic(app.getApplicant().getProfilePic());
                 return dto;
             }).collect(Collectors.toList());
     }

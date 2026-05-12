@@ -10,6 +10,12 @@ public class ApplicantResDto {
     private String email;
     private String university;
     private String degree;
+    private String bio;
+    private String skills;
+    private String resume;
+    private String resumeFileName;
+    private String profilePic;
+
     @Builder.Default
     private String role = "APPLICANT";
 }
