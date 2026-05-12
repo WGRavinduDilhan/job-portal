@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Table, Badge, Spinner } from 'react-bootstrap';
+import { Container, Table, Badge, Spinner, Modal, Button, Card, Image, Row, Col } from 'react-bootstrap';
 import { toast } from 'react-toastify';
-import { ArrowLeftCircle } from 'react-bootstrap-icons';
+import { ArrowLeftCircle, Eye, Download, FileEarmarkPdf, PersonCircle, BriefcaseFill, GeoAltFill } from 'react-bootstrap-icons';
 import axios from 'axios';
 
 const STATUSES = ['APPLIED', 'SHORTLISTED', 'INTERVIEW_SCHEDULED', 'OFFERED', 'REJECTED'];
@@ -16,6 +16,8 @@ export default function ApplicantPipeline() {
   const navigate = useNavigate();
   const [applicants, setApplicants] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedApplicant, setSelectedApplicant] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_URL}/company/jobs/${jobId}/applicants`, {
@@ -34,41 +36,85 @@ export default function ApplicantPipeline() {
     }).catch(err => toast.error('Failed to update status'));
   };
 
-  if (loading) return <div className="text-center mt-5"><Spinner animation="border" /></div>;
+  const handleViewProfile = (app) => {
+    setSelectedApplicant(app);
+    setShowModal(true);
+  };
+
+  const downloadResume = () => {
+    if (!selectedApplicant?.applicantResume) return;
+    const link = document.createElement('a');
+    link.href = selectedApplicant.applicantResume;
+    link.download = selectedApplicant.applicantResumeFileName || 'resume.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  if (loading) return <div className="text-center mt-5"><Spinner animation="border" variant="primary" /></div>;
 
   return (
-    <Container className="mt-4">
+    <Container className="mt-5 pb-5">
       <div className="d-flex align-items-center mb-4">
-        <button className="btn btn-link p-0 me-3 text-dark" onClick={() => navigate(-1)}>
-          <ArrowLeftCircle size={24} />
+        <button className="btn btn-link p-0 me-3 text-primary shadow-none" onClick={() => navigate(-1)}>
+          <ArrowLeftCircle size={32} />
         </button>
-        <h3 className="fw-bold mb-0">Applicant Pipeline</h3>
+        <div>
+          <h2 className="fw-bold mb-0">Applicant Pipeline</h2>
+          <p className="text-muted mb-0">Managing candidates for Job ID: #{jobId}</p>
+        </div>
       </div>
 
-      <div className="card shadow-sm border-0">
-        <Table responsive hover className="mb-0">
-          <thead className="table-dark">
+      <Card className="shadow-sm border-0 overflow-hidden">
+        <Table responsive hover className="mb-0 align-middle">
+          <thead className="bg-light border-bottom">
             <tr>
-              <th className="py-3 ps-4">Candidate Name</th>
-              <th className="py-3">Email</th>
-              <th className="py-3">Applied Date</th>
-              <th className="py-3 text-center">Current Status</th>
-              <th className="py-3 pe-4">Update Status</th>
+              <th className="py-3 ps-4">Candidate</th>
+              <th className="py-3">Education</th>
+              <th className="py-3 text-center">Status</th>
+              <th className="py-3 text-center">Actions</th>
+              <th className="py-3 pe-4 text-end">Update Status</th>
             </tr>
           </thead>
           <tbody>
             {applicants.map(app => (
               <tr key={app.id}>
-                <td className="py-3 ps-4 fw-bold">{app.applicantName}</td>
-                <td className="py-3">{app.applicantEmail}</td>
-                <td className="py-3">{app.appliedDate?.split('T')[0]}</td>
+                <td className="py-3 ps-4">
+                  <div className="d-flex align-items-center">
+                    {app.applicantProfilePic ? (
+                      <Image 
+                        src={app.applicantProfilePic} 
+                        roundedCircle 
+                        className="me-3 border" 
+                        style={{ width: '45px', height: '45px', objectFit: 'cover' }} 
+                      />
+                    ) : (
+                      <div className="bg-light rounded-circle d-flex align-items-center justify-content-center me-3 border" style={{ width: '45px', height: '45px' }}>
+                        <PersonCircle size={24} className="text-secondary" />
+                      </div>
+                    )}
+                    <div>
+                      <div className="fw-bold text-dark">{app.applicantName}</div>
+                      <div className="small text-muted">{app.applicantEmail}</div>
+                    </div>
+                  </div>
+                </td>
+                <td className="py-3">
+                  <div className="small fw-semibold">{app.university || 'N/A'}</div>
+                  <div className="small text-muted">{app.degree || 'N/A'}</div>
+                </td>
                 <td className="py-3 text-center">
-                  <Badge bg={STATUS_COLOR[app.status]} className="px-3 py-2">
+                  <Badge bg={STATUS_COLOR[app.status]} className="px-3 py-2 rounded-pill fw-medium">
                     {app.status?.replace('_', ' ')}
                   </Badge>
                 </td>
-                <td className="py-3 pe-4" style={{width: '200px'}}>
-                  <select className="form-select form-select-sm border-0 bg-light"
+                <td className="py-3 text-center">
+                   <Button variant="outline-primary" size="sm" className="rounded-pill px-3" onClick={() => handleViewProfile(app)}>
+                     <Eye className="me-1" /> Profile
+                   </Button>
+                </td>
+                <td className="py-3 pe-4 text-end">
+                  <select className="form-select form-select-sm border bg-light d-inline-block" style={{width: 'auto'}}
                       value={app.status} onChange={e => updateStatus(app.id, e.target.value)}>
                     {STATUSES.map(s => <option key={s} value={s}>{s.replace('_', ' ')}</option>)}
                   </select>
@@ -76,11 +122,112 @@ export default function ApplicantPipeline() {
               </tr>
             ))}
             {applicants.length === 0 && (
-              <tr><td colSpan={5} className="text-center py-5 text-muted">No applicants for this position yet.</td></tr>
+              <tr><td colSpan={5} className="text-center py-5">
+                <div className="text-muted">No candidates have applied for this position yet.</div>
+              </td></tr>
             )}
           </tbody>
         </Table>
-      </div>
+      </Card>
+
+      {/* Applicant Detail Modal */}
+      <Modal show={showModal} onHide={() => setShowModal(false)} size="lg" centered className="modal-professional">
+        <Modal.Header closeButton className="border-0 pb-0">
+          <Modal.Title className="fw-bold">Candidate Profile</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="pt-2">
+          {selectedApplicant && (
+            <div className="p-2">
+              <Row className="mb-4 align-items-center">
+                <Col xs="auto">
+                  {selectedApplicant.applicantProfilePic ? (
+                    <Image 
+                      src={selectedApplicant.applicantProfilePic} 
+                      roundedCircle 
+                      className="border" 
+                      style={{ width: '100px', height: '100px', objectFit: 'cover' }} 
+                    />
+                  ) : (
+                    <div className="bg-light rounded-circle d-flex align-items-center justify-content-center border" style={{ width: '100px', height: '100px' }}>
+                      <PersonCircle size={50} className="text-secondary" />
+                    </div>
+                  )}
+                </Col>
+                <Col>
+                  <h3 className="fw-bold mb-1">{selectedApplicant.applicantName}</h3>
+                  <div className="text-muted d-flex align-items-center mb-2">
+                    <span className="me-3">{selectedApplicant.applicantEmail}</span>
+                  </div>
+                  <Badge bg={STATUS_COLOR[selectedApplicant.status]} className="px-3 py-2 rounded-pill">
+                    Status: {selectedApplicant.status?.replace('_', ' ')}
+                  </Badge>
+                </Col>
+              </Row>
+
+              <hr className="my-4 opacity-50" />
+
+              <Row>
+                <Col md={7}>
+                  <div className="mb-4">
+                    <h6 className="fw-bold text-uppercase text-muted small mb-3">About Candidate</h6>
+                    <p className="text-dark" style={{whiteSpace: 'pre-line', fontSize: '0.95rem', lineHeight: '1.6'}}>
+                      {selectedApplicant.applicantBio || 'No professional bio provided.'}
+                    </p>
+                  </div>
+
+                  <div className="mb-4">
+                    <h6 className="fw-bold text-uppercase text-muted small mb-3">Technical Skills</h6>
+                    <div className="d-flex flex-wrap">
+                      {selectedApplicant.applicantSkills ? 
+                        selectedApplicant.applicantSkills.split(',').map((skill, i) => (
+                          <Badge key={i} bg="white" text="primary" className="border border-primary me-2 mb-2 px-3 py-2 fw-medium">
+                            {skill.trim()}
+                          </Badge>
+                        )) : <span className="text-muted italic small">No skills listed.</span>
+                      }
+                    </div>
+                  </div>
+                </Col>
+
+                <Col md={5}>
+                  <Card className="bg-light border-0 mb-4 p-3">
+                    <h6 className="fw-bold text-uppercase text-muted small mb-3">Education</h6>
+                    <div className="mb-2">
+                      <div className="fw-bold">{selectedApplicant.university || 'N/A'}</div>
+                      <div className="text-secondary small">{selectedApplicant.degree || 'N/A'}</div>
+                    </div>
+                  </Card>
+
+                  <Card className="border-0 shadow-sm p-3">
+                    <h6 className="fw-bold text-uppercase text-muted small mb-3">Documents</h6>
+                    <div className="d-flex align-items-center mb-3">
+                      <FileEarmarkPdf size={32} className="text-danger me-2" />
+                      <div className="overflow-hidden">
+                        <div className="text-truncate fw-bold small" title={selectedApplicant.applicantResumeFileName}>
+                          {selectedApplicant.applicantResumeFileName || 'Resume.pdf'}
+                        </div>
+                        <div className="text-muted smallest">Applicant CV</div>
+                      </div>
+                    </div>
+                    {selectedApplicant.applicantResume ? (
+                      <Button variant="primary" size="sm" className="w-100 rounded-pill mt-2" onClick={downloadResume}>
+                        <Download className="me-2" /> Download CV
+                      </Button>
+                    ) : (
+                      <Button variant="outline-secondary" size="sm" className="w-100 rounded-pill mt-2" disabled>
+                        No CV Uploaded
+                      </Button>
+                    )}
+                  </Card>
+                </Col>
+              </Row>
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer className="border-0 justify-content-center pb-4">
+          <Button variant="light" className="px-5 rounded-pill border" onClick={() => setShowModal(false)}>Close View</Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 }

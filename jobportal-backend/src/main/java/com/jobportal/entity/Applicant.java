@@ -25,6 +25,15 @@ public class Applicant implements CommonUserAuth {
     private String degree;
     private String phone;
 
+    @Lob
+    private String bio;
+    private String skills;
+    @Lob
+    private String resume;
+    private String resumeFileName;
+    @Lob
+    private String profilePic;
+
     @Enumerated(EnumType.STRING)
     private AccountVerifyStatus email_verified;
     @Enumerated(EnumType.STRING)

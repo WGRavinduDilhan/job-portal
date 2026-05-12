@@ -46,4 +46,13 @@ public class ApplicantController {
         Long id = CustomUserAuthenticator.getUserIdFromToken(token);
         return ResponseEntity.ok(new CommonResponse<>(true, "Applications retrieved", applicantService.getMyApplications(id)));
     }
+
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateProfile(
+            @RequestHeader(SecurityConstants.HEADER_AUTH) String token,
+            @RequestBody ApplicantReqDto dto) {
+        Long id = CustomUserAuthenticator.getUserIdFromToken(token);
+        applicantService.updateProfile(id, dto);
+        return ResponseEntity.ok(new CommonResponse<>(true, "Profile updated successfully!"));
+    }
 }

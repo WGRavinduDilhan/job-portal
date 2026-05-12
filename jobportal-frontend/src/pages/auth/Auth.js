@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Container, Row, Col, Card, Form, Button, Nav } from 'react-bootstrap';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { BriefcaseFill } from 'react-bootstrap-icons';
 
 const BASE_URL = process.env.REACT_APP_API_URL;
-
-// Base64 values for OAuth2 clients:
-// "applicant:password" → YXBwbGljYW50OnBhc3N3b3Jk
-// "company:password"   → Y29tcGFueTpwYXNzd29yZA==
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -33,7 +31,6 @@ export default function Auth() {
     data.append('password', password);
     data.append('grant_type', 'password');
     
-    // Updated client keys to match backend: applicant:password and company:password
     const clientKey = role === 'COMPANY' ? 'Y29tcGFueTpwYXNzd29yZA==' : 'YXBwbGljYW50OnBhc3N3b3Jk';
     
     try {
@@ -52,7 +49,8 @@ export default function Auth() {
     }
   };
 
-  const SignUpHandler = () => {
+  const SignUpHandler = (e) => {
+    e.preventDefault();
     if (!newUserName || !newEmail || !newPassword) { toast.warn('Fill all fields'); return; }
     const url = role === 'COMPANY' ? `${BASE_URL}/company/signup` : `${BASE_URL}/applicant/signup`;
     const body = role === 'COMPANY'
@@ -77,90 +75,123 @@ export default function Auth() {
       .catch(err => toast.error(err?.response?.data?.message || 'Sign up failed'));
   };
 
-  if (authMode === 'signin') {
-    return (
-      <div className="Auth-form-container d-flex align-items-center justify-content-center min-vh-100 bg-light">
-        <form className="Auth-form card shadow p-4" style={{maxWidth:'400px', width:'100%'}}>
-          <div className="Auth-form-content">
-            <h3 className="Auth-form-title text-center mb-4">Sign In</h3>
-            <div className="form-group mt-3">
-              <label>Login as</label>
-              <select className="form-control mt-1" value={role} onChange={e => setRole(e.target.value)}>
-                <option value="APPLICANT">Applicant (Graduate)</option>
-                <option value="COMPANY">Company (Recruiter)</option>
-              </select>
-            </div>
-            <div className="form-group mt-3">
-              <label>Username</label>
-              <input type="text" className="form-control mt-1" value={userName}
-                onChange={e => setUserName(e.target.value)} placeholder="Username" />
-            </div>
-            <div className="form-group mt-3">
-              <label>Password</label>
-              <input type="password" className="form-control mt-1" value={password}
-                onChange={e => setPassword(e.target.value)} placeholder="Password" />
-            </div>
-            <div className="d-grid gap-2 mt-4">
-              <button className="btn btn-dark" onClick={LoginHandler}>Sign In</button>
-            </div>
-            <div className="text-center mt-3">
-              <span className="link-text" style={{cursor:'pointer'}} onClick={() => setAuthMode('signup')}>
-                New here? <u className="text-primary">Sign Up</u>
-              </span>
-            </div>
-          </div>
-        </form>
-      </div>
-    );
-  }
-
   return (
-    <div className="Auth-form-container d-flex align-items-center justify-content-center min-vh-100 bg-light">
-      <form className="Auth-form card shadow p-4" style={{maxWidth:'450px', width:'100%'}}>
-        <div className="Auth-form-content">
-          <h3 className="Auth-form-title text-center mb-4">Sign Up</h3>
-          <div className="form-group mt-2">
-            <label>Registering as</label>
-            <select className="form-control mt-1" value={role} onChange={e => setRole(e.target.value)}>
-              <option value="APPLICANT">Graduate / Applicant</option>
-              <option value="COMPANY">Company / Recruiter</option>
-            </select>
-          </div>
-          <div className="form-group mt-2"><label>Username</label>
-            <input type="text" className="form-control mt-1" value={newUserName}
-              onChange={e => setNewUserName(e.target.value)} /></div>
-          <div className="form-group mt-2"><label>Email</label>
-            <input type="email" className="form-control mt-1" value={newEmail}
-              onChange={e => setNewEmail(e.target.value)} /></div>
-          <div className="form-group mt-2"><label>Password</label>
-            <input type="password" className="form-control mt-1" value={newPassword}
-              onChange={e => setNewPassword(e.target.value)} /></div>
-          {role === 'APPLICANT' && <>
-            <div className="form-group mt-2"><label>University</label>
-              <input type="text" className="form-control mt-1" value={university}
-                onChange={e => setUniversity(e.target.value)} /></div>
-            <div className="form-group mt-2"><label>Degree</label>
-              <input type="text" className="form-control mt-1" value={degree}
-                onChange={e => setDegree(e.target.value)} /></div>
-          </>}
-          {role === 'COMPANY' && <>
-            <div className="form-group mt-2"><label>Company Name</label>
-              <input type="text" className="form-control mt-1" value={companyName}
-                onChange={e => setCompanyName(e.target.value)} /></div>
-            <div className="form-group mt-2"><label>Industry</label>
-              <input type="text" className="form-control mt-1" value={industry}
-                onChange={e => setIndustry(e.target.value)} /></div>
-          </>}
-          <div className="d-grid gap-2 mt-4">
-            <button type="button" className="btn btn-primary" onClick={SignUpHandler}>Sign Up</button>
-          </div>
-          <div className="text-center mt-3">
-            <span style={{cursor:'pointer'}} onClick={() => setAuthMode('signin')}>
-              Already registered? <u className="text-primary">Sign In</u>
-            </span>
-          </div>
-        </div>
-      </form>
+    <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light px-3 py-5">
+      <Card className="border-0 shadow-lg overflow-hidden" style={{ maxWidth: '900px', width: '100%', borderRadius: '20px' }}>
+        <Row className="g-0">
+          {/* Left Side: Branding/Visual */}
+          <Col md={5} className="bg-primary d-none d-md-flex flex-column align-items-center justify-content-center text-white p-5 text-center">
+            <BriefcaseFill size={64} className="mb-4" />
+            <h2 className="fw-bold mb-3">Welcome to JobPortal</h2>
+            <p className="opacity-75">Connect with the world's leading companies and land your dream job today.</p>
+          </Col>
+
+          {/* Right Side: Form */}
+          <Col md={7} className="p-4 p-md-5 bg-white">
+            <div className="mb-4 text-center d-md-none">
+              <BriefcaseFill size={40} className="text-primary mb-2" />
+              <h3 className="fw-bold">JobPortal</h3>
+            </div>
+
+            <div className="d-flex justify-content-center mb-4">
+              <Nav variant="pills" activeKey={authMode} onSelect={(k) => setAuthMode(k)} className="bg-light p-1 rounded-pill">
+                <Nav.Item>
+                  <Nav.Link eventKey="signin" className="rounded-pill px-4">Sign In</Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link eventKey="signup" className="rounded-pill px-4">Sign Up</Nav.Link>
+                </Nav.Item>
+              </Nav>
+            </div>
+
+            <Form onSubmit={authMode === 'signin' ? LoginHandler : SignUpHandler}>
+              <Form.Group className="mb-3">
+                <Form.Label className="small fw-bold text-muted text-uppercase">I am a</Form.Label>
+                <Form.Select value={role} onChange={e => setRole(e.target.value)} className="bg-light border-0">
+                  <option value="APPLICANT">Graduate / Applicant</option>
+                  <option value="COMPANY">Company / Recruiter</option>
+                </Form.Select>
+              </Form.Group>
+
+              {authMode === 'signin' ? (
+                <>
+                  <Form.Group className="mb-3">
+                    <Form.Label className="small fw-bold text-muted text-uppercase">Username</Form.Label>
+                    <Form.Control type="text" placeholder="Enter username" value={userName} onChange={e => setUserName(e.target.value)} />
+                  </Form.Group>
+                  <Form.Group className="mb-4">
+                    <Form.Label className="small fw-bold text-muted text-uppercase">Password</Form.Label>
+                    <Form.Control type="password" placeholder="Enter password" value={password} onChange={e => setPassword(e.target.value)} />
+                  </Form.Group>
+                  <Button variant="primary" type="submit" className="w-100 py-2 fs-5">Sign In</Button>
+                </>
+              ) : (
+                <>
+                  <Row>
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
+                        <Form.Label className="small fw-bold text-muted text-uppercase">Username</Form.Label>
+                        <Form.Control type="text" value={newUserName} onChange={e => setNewUserName(e.target.value)} />
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
+                        <Form.Label className="small fw-bold text-muted text-uppercase">Email</Form.Label>
+                        <Form.Control type="email" value={newEmail} onChange={e => setNewEmail(e.target.value)} />
+                      </Form.Group>
+                    </Col>
+                  </Row>
+                  <Form.Group className="mb-3">
+                    <Form.Label className="small fw-bold text-muted text-uppercase">Password</Form.Label>
+                    <Form.Control type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
+                  </Form.Group>
+                  
+                  {role === 'APPLICANT' ? (
+                    <Row>
+                      <Col md={6}>
+                        <Form.Group className="mb-3">
+                          <Form.Label className="small fw-bold text-muted text-uppercase">University</Form.Label>
+                          <Form.Control type="text" value={university} onChange={e => setUniversity(e.target.value)} />
+                        </Form.Group>
+                      </Col>
+                      <Col md={6}>
+                        <Form.Group className="mb-3">
+                          <Form.Label className="small fw-bold text-muted text-uppercase">Degree</Form.Label>
+                          <Form.Control type="text" value={degree} onChange={e => setDegree(e.target.value)} />
+                        </Form.Group>
+                      </Col>
+                    </Row>
+                  ) : (
+                    <Row>
+                      <Col md={6}>
+                        <Form.Group className="mb-3">
+                          <Form.Label className="small fw-bold text-muted text-uppercase">Company Name</Form.Label>
+                          <Form.Control type="text" value={companyName} onChange={e => setCompanyName(e.target.value)} />
+                        </Form.Group>
+                      </Col>
+                      <Col md={6}>
+                        <Form.Group className="mb-3">
+                          <Form.Label className="small fw-bold text-muted text-uppercase">Industry</Form.Label>
+                          <Form.Control type="text" value={industry} onChange={e => setIndustry(e.target.value)} />
+                        </Form.Group>
+                      </Col>
+                    </Row>
+                  )}
+                  <Button variant="primary" type="submit" className="w-100 py-2 fs-5 mt-2">Create Account</Button>
+                </>
+              )}
+            </Form>
+
+            <div className="text-center mt-4 text-muted small">
+              {authMode === 'signin' ? (
+                <p>Don't have an account? <span className="text-primary fw-bold cursor-pointer" onClick={() => setAuthMode('signup')} style={{cursor:'pointer'}}>Sign Up</span></p>
+              ) : (
+                <p>Already have an account? <span className="text-primary fw-bold cursor-pointer" onClick={() => setAuthMode('signin')} style={{cursor:'pointer'}}>Sign In</span></p>
+              )}
+            </div>
+          </Col>
+        </Row>
+      </Card>
     </div>
   );
 }

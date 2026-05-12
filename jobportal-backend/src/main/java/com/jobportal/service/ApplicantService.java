@@ -9,5 +9,6 @@ public interface ApplicantService {
     void saveNewApplicant(ApplicantReqDto dto);
     void verifyAccountAndEmail(String token);
     ApplicantResDto getProfile(Long applicantId);
+    void updateProfile(Long applicantId, ApplicantReqDto dto);
     List<ApplicationResDto> getMyApplications(Long applicantId);
 }

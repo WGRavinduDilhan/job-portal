@@ -11,6 +11,7 @@ import Dashboard from './pages/applicant/Dashboard';
 import JobList from './pages/applicant/JobList';
 import JobDetail from './pages/applicant/JobDetail';
 import MyApplications from './pages/applicant/MyApplications';
+import Profile from './pages/applicant/Profile';
 import CompanyDashboard from './pages/company/CompanyDashboard';
 import PostJob from './pages/company/PostJob';
 import ApplicantPipeline from './pages/company/ApplicantPipeline';
@@ -40,6 +41,7 @@ function App() {
         <Route path="/jobs"             element={<ProtectedRoute><JobList /></ProtectedRoute>} />
         <Route path="/jobs/:id"         element={<ProtectedRoute><JobDetail /></ProtectedRoute>} />
         <Route path="/my-applications"  element={<ProtectedRoute><MyApplications /></ProtectedRoute>} />
+        <Route path="/profile"          element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
         <Route path="/company/dashboard" element={<ProtectedRoute><CompanyDashboard /></ProtectedRoute>} />
         <Route path="/company/post-job"  element={<ProtectedRoute><PostJob /></ProtectedRoute>} />

@@ -83,7 +83,32 @@ public class ApplicantServiceImpl implements ApplicantService {
     public ApplicantResDto getProfile(Long applicantId) {
         Applicant a = applicantRepository.findById(applicantId)
             .orElseThrow(() -> new CustomServiceException("User not found"));
-        return modelMapper.map(a, ApplicantResDto.class);
+        ApplicantResDto res = modelMapper.map(a, ApplicantResDto.class);
+        res.setBio(a.getBio());
+        res.setSkills(a.getSkills());
+        res.setResume(a.getResume());
+        res.setResumeFileName(a.getResumeFileName());
+        res.setProfilePic(a.getProfilePic());
+        return res;
+    }
+
+    @Override
+    @Transactional
+    public void updateProfile(Long applicantId, ApplicantReqDto dto) {
+        Applicant a = applicantRepository.findById(applicantId)
+            .orElseThrow(() -> new CustomServiceException("User not found"));
+        
+        if (dto.getUniversity() != null) a.setUniversity(dto.getUniversity());
+        if (dto.getDegree() != null) a.setDegree(dto.getDegree());
+        if (dto.getPhone() != null) a.setPhone(dto.getPhone());
+        if (dto.getBio() != null) a.setBio(dto.getBio());
+        if (dto.getSkills() != null) a.setSkills(dto.getSkills());
+        if (dto.getResume() != null) a.setResume(dto.getResume());
+        if (dto.getResumeFileName() != null) a.setResumeFileName(dto.getResumeFileName());
+        if (dto.getProfilePic() != null) a.setProfilePic(dto.getProfilePic());
+        
+        a.setUpdated(new Date());
+        applicantRepository.save(a);
     }
 
     @Override
