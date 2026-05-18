@@ -61,11 +61,11 @@ jobs:
         with:
           context: ./jobportal-backend
           push: true
-          tags: ${{ secrets.ravindudilhan }}/jobportal-backend:latest
+          tags: ravindudilhan/jobportal-backend:latest
 
       - name: Build and push Frontend Image
         uses: docker/build-push-action@v4
         with:
           context: ./jobportal-frontend
           push: true
-          tags: ${{ secrets.ravindudilhan }}/jobportal-frontend:latest
+          tags: ravindudilhan/jobportal-frontend:latest
