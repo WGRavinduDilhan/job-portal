@@ -54,18 +54,18 @@ jobs:
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push Backend Image
         uses: docker/build-push-action@v4
         with:
           context: ./jobportal-backend
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/jobportal-backend:latest
+          tags: ${{ secrets.ravindudilhan }}/jobportal-backend:latest
 
       - name: Build and push Frontend Image
         uses: docker/build-push-action@v4
         with:
           context: ./jobportal-frontend
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/jobportal-frontend:latest
+          tags: ${{ secrets.ravindudilhan }}/jobportal-frontend:latest
