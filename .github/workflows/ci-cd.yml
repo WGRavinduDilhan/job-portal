@@ -1,0 +1,71 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: maven
+          
+      - name: Build and Test Backend
+        working-directory: ./jobportal-backend
+        run: mvn clean package -DskipTests
+        # Note: -DskipTests is used to speed up the process. Remove it if you want tests to run.
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: './jobportal-frontend/package-lock.json'
+          
+      - name: Install Dependencies & Build
+        working-directory: ./jobportal-frontend
+        run: |
+          npm install
+          CI=false npm run build
+
+  docker-push:
+    needs: [build-backend, build-frontend]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Backend Image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./jobportal-backend
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/jobportal-backend:latest
+
+      - name: Build and push Frontend Image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./jobportal-frontend
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/jobportal-frontend:latest
