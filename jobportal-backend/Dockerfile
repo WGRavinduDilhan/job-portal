@@ -8,7 +8,8 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Stage 2: Run the application
-FROM eclipse-temurin:11-jre
+FROM eclipse-temurin:11-jre-alpine
+RUN apk update && apk upgrade --no-cache
 WORKDIR /app
 COPY --from=build /app/target/jobportal-api.jar app.jar
 EXPOSE 8080
