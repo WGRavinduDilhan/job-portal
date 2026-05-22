@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-backend:
+  build-and-test-backend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -21,10 +21,9 @@ jobs:
           
       - name: Build and Test Backend
         working-directory: ./jobportal-backend
-        run: mvn clean package -DskipTests
-        # Note: -DskipTests is used to speed up the process. Remove it if you want tests to run.
+        run: mvn clean package
 
-  build-frontend:
+  build-and-test-frontend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -36,14 +35,117 @@ jobs:
           cache: 'npm'
           cache-dependency-path: './jobportal-frontend/package-lock.json'
           
-      - name: Install Dependencies & Build
+      - name: Install Dependencies
         working-directory: ./jobportal-frontend
+        run: npm install
+          
+      - name: Run Frontend Tests
+        working-directory: ./jobportal-frontend
+        run: CI=true npm test
+        
+      - name: Build Frontend Application
+        working-directory: ./jobportal-frontend
+        run: CI=false npm run build
+
+  security-scan-repo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run Trivy FS Scanner (Console Report)
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Run Trivy FS Scanner (JSON Report)
+        uses: aquasecurity/trivy-action@0.20.0
+        if: always()
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'json'
+          output: 'trivy-repo-report.json'
+          severity: 'CRITICAL,HIGH,MEDIUM,LOW'
+
+      - name: Upload Repository Scan Report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: trivy-repo-report
+          path: trivy-repo-report.json
+
+  build-and-scan-images:
+    needs: [build-and-test-backend, build-and-test-frontend, security-scan-repo]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Backend Image Locally
         run: |
-          npm install
-          CI=false npm run build
+          docker build -t ravindudilhan/jobportal-backend:${{ github.sha }} ./jobportal-backend
+
+      - name: Build Frontend Image Locally
+        run: |
+          docker build -t ravindudilhan/jobportal-frontend:${{ github.sha }} ./jobportal-frontend
+
+      - name: Scan Backend Image (Policy Gate)
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: 'ravindudilhan/jobportal-backend:${{ github.sha }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL'
+
+      - name: Scan Frontend Image (Policy Gate)
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: 'ravindudilhan/jobportal-frontend:${{ github.sha }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL'
+
+      - name: Generate Backend Image JSON Report
+        uses: aquasecurity/trivy-action@0.20.0
+        if: always()
+        with:
+          image-ref: 'ravindudilhan/jobportal-backend:${{ github.sha }}'
+          format: 'json'
+          output: 'trivy-backend-image-report.json'
+          severity: 'CRITICAL,HIGH,MEDIUM,LOW'
+
+      - name: Generate Frontend Image JSON Report
+        uses: aquasecurity/trivy-action@0.20.0
+        if: always()
+        with:
+          image-ref: 'ravindudilhan/jobportal-frontend:${{ github.sha }}'
+          format: 'json'
+          output: 'trivy-frontend-image-report.json'
+          severity: 'CRITICAL,HIGH,MEDIUM,LOW'
+
+      - name: Upload Image Scan Reports
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: trivy-image-reports
+          path: |
+            trivy-backend-image-report.json
+            trivy-frontend-image-report.json
 
   docker-push:
-    needs: [build-backend, build-frontend]
+    needs: [build-and-scan-images]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     
@@ -61,11 +163,15 @@ jobs:
         with:
           context: ./jobportal-backend
           push: true
-          tags: ravindudilhan/jobportal-backend:latest
+          tags: |
+            ravindudilhan/jobportal-backend:latest
+            ravindudilhan/jobportal-backend:${{ github.sha }}
 
       - name: Build and push Frontend Image
         uses: docker/build-push-action@v4
         with:
           context: ./jobportal-frontend
           push: true
-          tags: ravindudilhan/jobportal-frontend:latest
+          tags: |
+            ravindudilhan/jobportal-frontend:latest
+            ravindudilhan/jobportal-frontend:${{ github.sha }}
