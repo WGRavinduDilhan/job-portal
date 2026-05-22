@@ -53,7 +53,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Run Trivy FS Scanner (Console Report)
-        uses: aquasecurity/trivy-action@0.20.0
+        uses: aquasecurity/trivy-action@v0.20.0
         with:
           scan-type: 'fs'
           scan-ref: '.'
@@ -61,7 +61,7 @@ jobs:
           severity: 'CRITICAL,HIGH'
 
       - name: Run Trivy FS Scanner (JSON Report)
-        uses: aquasecurity/trivy-action@0.20.0
+        uses: aquasecurity/trivy-action@v0.20.0
         if: always()
         with:
           scan-type: 'fs'
@@ -71,7 +71,7 @@ jobs:
           severity: 'CRITICAL,HIGH,MEDIUM,LOW'
 
       - name: Upload Repository Scan Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: trivy-repo-report
@@ -98,7 +98,7 @@ jobs:
           docker build -t ravindudilhan/jobportal-frontend:${{ github.sha }} ./jobportal-frontend
 
       - name: Scan Backend Image (Policy Gate)
-        uses: aquasecurity/trivy-action@0.20.0
+        uses: aquasecurity/trivy-action@v0.20.0
         with:
           image-ref: 'ravindudilhan/jobportal-backend:${{ github.sha }}'
           format: 'table'
@@ -108,7 +108,7 @@ jobs:
           severity: 'CRITICAL'
 
       - name: Scan Frontend Image (Policy Gate)
-        uses: aquasecurity/trivy-action@0.20.0
+        uses: aquasecurity/trivy-action@v0.20.0
         with:
           image-ref: 'ravindudilhan/jobportal-frontend:${{ github.sha }}'
           format: 'table'
@@ -118,7 +118,7 @@ jobs:
           severity: 'CRITICAL'
 
       - name: Generate Backend Image JSON Report
-        uses: aquasecurity/trivy-action@0.20.0
+        uses: aquasecurity/trivy-action@v0.20.0
         if: always()
         with:
           image-ref: 'ravindudilhan/jobportal-backend:${{ github.sha }}'
@@ -127,7 +127,7 @@ jobs:
           severity: 'CRITICAL,HIGH,MEDIUM,LOW'
 
       - name: Generate Frontend Image JSON Report
-        uses: aquasecurity/trivy-action@0.20.0
+        uses: aquasecurity/trivy-action@v0.20.0
         if: always()
         with:
           image-ref: 'ravindudilhan/jobportal-frontend:${{ github.sha }}'
@@ -136,7 +136,7 @@ jobs:
           severity: 'CRITICAL,HIGH,MEDIUM,LOW'
 
       - name: Upload Image Scan Reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: trivy-image-reports
