@@ -175,3 +175,50 @@ jobs:
           tags: |
             ravindudilhan/jobportal-frontend:latest
             ravindudilhan/jobportal-frontend:${{ github.sha }}
+
+  deploy-to-k3s:
+    needs: [docker-push]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.K3S_KUBECONFIG }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Replace Image Tags with Commit SHA
+        run: |
+          sed -i "s|ravindudilhan/jobportal-backend:latest|ravindudilhan/jobportal-backend:${{ github.sha }}|g" k8s/backend-deployment.yaml
+          sed -i "s|ravindudilhan/jobportal-frontend:latest|ravindudilhan/jobportal-frontend:${{ github.sha }}|g" k8s/frontend-deployment.yaml
+
+      - name: Deploy to K3s Cluster
+        run: |
+          # Apply namespace and configurations first
+          kubectl apply -f k8s/namespace.yaml
+          kubectl apply -f k8s/configmap.yaml -n job-portal
+          kubectl apply -f k8s/mysql-pvc.yaml -n job-portal
+          
+          # Deploy MySQL database
+          kubectl apply -f k8s/mysql-deployment.yaml -n job-portal
+          kubectl apply -f k8s/mysql-service.yaml -n job-portal
+          
+          # Deploy Application layers
+          kubectl apply -f k8s/backend-deployment.yaml -n job-portal
+          kubectl apply -f k8s/backend-service.yaml -n job-portal
+          kubectl apply -f k8s/frontend-deployment.yaml -n job-portal
+          kubectl apply -f k8s/frontend-service.yaml -n job-portal
+          
+          # Deploy Ingress routing rules
+          kubectl apply -f k8s/ingress.yaml -n job-portal
+
+      - name: Verify Deployments Rollout
+        run: |
+          echo "Verifying backend rollout..."
+          kubectl rollout status deployment/backend -n job-portal --timeout=120s
+          echo "Verifying frontend rollout..."
+          kubectl rollout status deployment/frontend -n job-portal --timeout=120s

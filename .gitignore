@@ -34,3 +34,7 @@ Desktop.ini
 **/*.war
 **/*.ear
 **/logs/
+
+# Kubernetes Secrets
+k8s/secrets.yaml
+
