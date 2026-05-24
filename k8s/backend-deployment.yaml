@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    app: jobportal
+    service: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: jobportal
+      service: backend
+  template:
+    metadata:
+      labels:
+        app: jobportal
+        service: backend
+    spec:
+      containers:
+        - name: backend
+          image: ravindudilhan/jobportal-backend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              valueFrom:
+                configMapKeyRef:
+                  name: jobportal-config
+                  key: SPRING_PROFILES_ACTIVE
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: jobportal-config
+                  key: SPRING_DATASOURCE_URL
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: jobportal-config
+                  key: SPRING_DATASOURCE_USERNAME
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: jobportal-secrets
+                  key: mysql-root-password
+            - name: SPRING_MAIL_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: jobportal-config
+                  key: SPRING_MAIL_HOST
+            - name: SPRING_MAIL_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: jobportal-config
+                  key: SPRING_MAIL_PORT
+            - name: SPRING_MAIL_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: jobportal-config
+                  key: SPRING_MAIL_USERNAME
+            - name: SPRING_MAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: jobportal-secrets
+                  key: mail-password
+            - name: MAIL_FROM
+              valueFrom:
+                configMapKeyRef:
+                  name: jobportal-config
+                  key: MAIL_FROM
+            - name: JOB_FRONTEND_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: jobportal-config
+                  key: JOB_FRONTEND_BASE_URL
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1024Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /api/actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 45
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /api/actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 15
