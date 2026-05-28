@@ -218,6 +218,12 @@ jobs:
 
           kubectl --kubeconfig "${{ env.KUBECONFIG_FILE }}" config current-context
 
+      - name: Ensure Namespace Exists
+        if: env.SKIP_K3S_DEPLOY != 'true'
+        run: |
+          export KUBECONFIG="${{ env.KUBECONFIG_FILE }}"
+          kubectl --kubeconfig "$KUBECONFIG" create namespace job-portal --dry-run=client -o yaml | kubectl --kubeconfig "$KUBECONFIG" apply -f -
+
       - name: Create or Update Kubernetes Secrets
         if: env.SKIP_K3S_DEPLOY != 'true'
         env:
