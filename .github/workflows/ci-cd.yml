@@ -189,10 +189,10 @@ jobs:
 
       - name: Set up Kubeconfig
         env:
-          KUBECONFIG_CONTENT: ${{ secrets.K3S_KUBECONFIG }}
+          KUBECONFIG_CONTENT: ${{ secrets.KUBECONFIG }}
         run: |
           if [ -z "$KUBECONFIG_CONTENT" ]; then
-            echo "K3S_KUBECONFIG is not set, so deployment will be skipped for testing."
+            echo "KUBECONFIG secret is not set, so deployment will be skipped for testing."
             echo "SKIP_K3S_DEPLOY=true" >> "$GITHUB_ENV"
             exit 0
           fi
@@ -207,11 +207,59 @@ jobs:
 
           SERVER_URL=$(kubectl --kubeconfig "${{ env.KUBECONFIG_FILE }}" config view --raw --minify -o jsonpath='{.clusters[0].cluster.server}')
           if echo "$SERVER_URL" | grep -Eq 'localhost|127\.0\.0\.1|::1'; then
-            echo "::error::K3S_KUBECONFIG points to $SERVER_URL. Update the secret to use a reachable cluster endpoint, not localhost."
+            echo "::error::KUBECONFIG points to $SERVER_URL. Update the secret to use a reachable cluster endpoint, not localhost."
             exit 1
           fi
 
           kubectl --kubeconfig "${{ env.KUBECONFIG_FILE }}" config current-context
+
+      - name: Create or Update Kubernetes Secrets
+        if: env.SKIP_K3S_DEPLOY != 'true'
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          RDSDB_PASSWORD: ${{ secrets.RDSDB_PASSWORD }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          RDSDB_USERNAME: ${{ secrets.RDSDB_USERNAME }}
+        run: |
+          export KUBECONFIG="${{ env.KUBECONFIG_FILE }}"
+
+          ROOT_PW="$MYSQL_ROOT_PASSWORD"
+          if [ -z "$ROOT_PW" ]; then
+            ROOT_PW="$DB_PASSWORD"
+          fi
+          if [ -z "$ROOT_PW" ]; then
+            ROOT_PW="$RDSDB_PASSWORD"
+          fi
+
+          if [ -z "$ROOT_PW" ]; then
+            echo "::error::Set one of MYSQL_ROOT_PASSWORD, DB_PASSWORD, or RDSDB_PASSWORD in GitHub Secrets."
+            exit 1
+          fi
+
+          MAIL_PW_VALUE="${MAIL_PASSWORD:-placeholder}"
+          JWT_SECRET_VALUE="${JWT_SECRET:-supersecretkey}"
+          DB_HOST_VALUE="${DB_HOST:-db}"
+          DB_USERNAME_VALUE="$DB_USERNAME"
+          if [ -z "$DB_USERNAME_VALUE" ]; then
+            DB_USERNAME_VALUE="$RDSDB_USERNAME"
+          fi
+          if [ -z "$DB_USERNAME_VALUE" ]; then
+            DB_USERNAME_VALUE="root"
+          fi
+
+          kubectl --kubeconfig "$KUBECONFIG" create secret generic jobportal-secrets \
+            --from-literal=mysql-root-password="$ROOT_PW" \
+            --from-literal=mail-password="$MAIL_PW_VALUE" \
+            --from-literal=jwt-secret="$JWT_SECRET_VALUE" \
+            --from-literal=DB_HOST="$DB_HOST_VALUE" \
+            --from-literal=DB_USERNAME="$DB_USERNAME_VALUE" \
+            --from-literal=DB_PASSWORD="$ROOT_PW" \
+            --namespace=job-portal \
+            --dry-run=client -o yaml | kubectl --kubeconfig "$KUBECONFIG" apply -f -
 
       - name: Replace Image Tags with Commit SHA
         if: env.SKIP_K3S_DEPLOY != 'true'
@@ -219,7 +267,7 @@ jobs:
           sed -i "s|ravindudilhan/jobportal-backend:latest|ravindudilhan/jobportal-backend:${{ github.sha }}|g" k8s/backend-deployment.yaml
           sed -i "s|ravindudilhan/jobportal-frontend:latest|ravindudilhan/jobportal-frontend:${{ github.sha }}|g" k8s/frontend-deployment.yaml
 
-      - name: Deploy to K3s Cluster
+      - name: Deploy to EC2 K3s Cluster
         if: env.SKIP_K3S_DEPLOY != 'true'
         run: |
           export KUBECONFIG="${{ env.KUBECONFIG_FILE }}"
@@ -254,4 +302,4 @@ jobs:
 
       - name: Skip K3s Deployment For Testing
         if: env.SKIP_K3S_DEPLOY == 'true'
-        run: echo "K3s deployment skipped because K3S_KUBECONFIG is not configured."
+        run: echo "K3s deployment skipped because KUBECONFIG is not configured."
