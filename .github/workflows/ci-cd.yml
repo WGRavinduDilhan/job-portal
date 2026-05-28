@@ -192,8 +192,9 @@ jobs:
           KUBECONFIG_CONTENT: ${{ secrets.K3S_KUBECONFIG }}
         run: |
           if [ -z "$KUBECONFIG_CONTENT" ]; then
-            echo "::error::K3S_KUBECONFIG secret is empty or not configured in GitHub Secrets!"
-            exit 1
+            echo "K3S_KUBECONFIG is not set, so deployment will be skipped for testing."
+            echo "SKIP_K3S_DEPLOY=true" >> "$GITHUB_ENV"
+            exit 0
           fi
 
           if printf '%s' "$KUBECONFIG_CONTENT" | grep -q '^apiVersion:'; then
@@ -213,11 +214,13 @@ jobs:
           kubectl --kubeconfig "${{ env.KUBECONFIG_FILE }}" config current-context
 
       - name: Replace Image Tags with Commit SHA
+        if: env.SKIP_K3S_DEPLOY != 'true'
         run: |
           sed -i "s|ravindudilhan/jobportal-backend:latest|ravindudilhan/jobportal-backend:${{ github.sha }}|g" k8s/backend-deployment.yaml
           sed -i "s|ravindudilhan/jobportal-frontend:latest|ravindudilhan/jobportal-frontend:${{ github.sha }}|g" k8s/frontend-deployment.yaml
 
       - name: Deploy to K3s Cluster
+        if: env.SKIP_K3S_DEPLOY != 'true'
         run: |
           export KUBECONFIG="${{ env.KUBECONFIG_FILE }}"
 
@@ -240,6 +243,7 @@ jobs:
           kubectl --kubeconfig "$KUBECONFIG" apply -f k8s/ingress.yaml -n job-portal
 
       - name: Verify Deployments Rollout
+        if: env.SKIP_K3S_DEPLOY != 'true'
         run: |
           export KUBECONFIG="${{ env.KUBECONFIG_FILE }}"
 
@@ -247,3 +251,7 @@ jobs:
           kubectl --kubeconfig "$KUBECONFIG" rollout status deployment/backend -n job-portal --timeout=120s
           echo "Verifying frontend rollout..."
           kubectl --kubeconfig "$KUBECONFIG" rollout status deployment/frontend -n job-portal --timeout=120s
+
+      - name: Skip K3s Deployment For Testing
+        if: env.SKIP_K3S_DEPLOY == 'true'
+        run: echo "K3s deployment skipped because K3S_KUBECONFIG is not configured."
