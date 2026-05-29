@@ -306,30 +306,35 @@ jobs:
         run: |
           export KUBECONFIG="${{ env.KUBECONFIG_FILE }}"
 
-          # Namespace and config
-          kubectl --kubeconfig "$KUBECONFIG" apply --validate=false -f k8s/namespace.yaml
-          kubectl --kubeconfig "$KUBECONFIG" apply --validate=false -f k8s/configmap.yaml
+          kubectl apply --validate=false -f k8s/namespace.yaml
+          kubectl apply --validate=false -f k8s/configmap.yaml
 
-          # Backend only (NO mysql - using RDS)
-          kubectl --kubeconfig "$KUBECONFIG" apply --validate=false -f k8s/backend-deployment.yaml
-          kubectl --kubeconfig "$KUBECONFIG" apply --validate=false -f k8s/backend-service.yaml
+          # Force delete any stuck pods before deploying
+          kubectl delete pod -n job-portal -l service=backend \
+            --force --grace-period=0 2>/dev/null || true
 
-          # Frontend
-          kubectl --kubeconfig "$KUBECONFIG" apply --validate=false -f k8s/frontend-deployment.yaml
-          kubectl --kubeconfig "$KUBECONFIG" apply --validate=false -f k8s/frontend-service.yaml
+          kubectl apply --validate=false -f k8s/backend-deployment.yaml
+          kubectl apply --validate=false -f k8s/backend-service.yaml
+          kubectl apply --validate=false -f k8s/frontend-deployment.yaml
+          kubectl apply --validate=false -f k8s/frontend-service.yaml
+          kubectl apply --validate=false -f k8s/ingress.yaml
 
-          # Ingress
-          kubectl --kubeconfig "$KUBECONFIG" apply --validate=false -f k8s/ingress.yaml
+          # Give pods time to start before rollout check
+          echo "Waiting 30s for pods to initialize..."
+          sleep 30
 
       - name: Verify Deployments Rollout
         if: env.SKIP_K3S_DEPLOY != 'true'
         run: |
           export KUBECONFIG="${{ env.KUBECONFIG_FILE }}"
 
-          echo "Verifying backend rollout..."
+          echo "Waiting for backend rollout..."
           kubectl --kubeconfig "$KUBECONFIG" rollout status deployment/backend -n job-portal --timeout=600s
-          echo "Verifying frontend rollout..."
+          echo "Waiting for frontend rollout..."
           kubectl --kubeconfig "$KUBECONFIG" rollout status deployment/frontend -n job-portal --timeout=600s
+
+          echo "Final pod status:"
+          kubectl get pods -n job-portal
 
       - name: Skip K3s Deployment For Testing
         if: env.SKIP_K3S_DEPLOY == 'true'
