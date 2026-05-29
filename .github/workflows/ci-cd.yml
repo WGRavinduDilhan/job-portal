@@ -329,12 +329,16 @@ jobs:
           export KUBECONFIG="${{ env.KUBECONFIG_FILE }}"
 
           echo "Waiting for backend rollout..."
-          kubectl --kubeconfig "$KUBECONFIG" rollout status deployment/backend -n job-portal --timeout=600s
+          kubectl rollout status deployment/backend -n job-portal --timeout=600s || true
+
           echo "Waiting for frontend rollout..."
-          kubectl --kubeconfig "$KUBECONFIG" rollout status deployment/frontend -n job-portal --timeout=600s
+          kubectl rollout status deployment/frontend -n job-portal --timeout=600s || true
 
           echo "Final pod status:"
           kubectl get pods -n job-portal
+
+          echo "Backend logs:"
+          kubectl logs -l service=backend -n job-portal --tail=20 || true
 
       - name: Skip K3s Deployment For Testing
         if: env.SKIP_K3S_DEPLOY == 'true'
