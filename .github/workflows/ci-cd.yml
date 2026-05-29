@@ -306,23 +306,20 @@ jobs:
         run: |
           export KUBECONFIG="${{ env.KUBECONFIG_FILE }}"
 
-          # Apply namespace and configurations first
+          # Namespace and config
           kubectl --kubeconfig "$KUBECONFIG" apply --validate=false -f k8s/namespace.yaml
-          kubectl --kubeconfig "$KUBECONFIG" apply --validate=false -f k8s/configmap.yaml -n job-portal
-          kubectl --kubeconfig "$KUBECONFIG" apply --validate=false -f k8s/mysql-pvc.yaml -n job-portal
-          
-          # Deploy MySQL database
-          kubectl --kubeconfig "$KUBECONFIG" apply --validate=false -f k8s/mysql-deployment.yaml -n job-portal
-          kubectl --kubeconfig "$KUBECONFIG" apply --validate=false -f k8s/mysql-service.yaml -n job-portal
-          
-          # Deploy Application layers
-          kubectl --kubeconfig "$KUBECONFIG" apply --validate=false -f k8s/backend-deployment.yaml -n job-portal
-          kubectl --kubeconfig "$KUBECONFIG" apply --validate=false -f k8s/backend-service.yaml -n job-portal
-          kubectl --kubeconfig "$KUBECONFIG" apply --validate=false -f k8s/frontend-deployment.yaml -n job-portal
-          kubectl --kubeconfig "$KUBECONFIG" apply --validate=false -f k8s/frontend-service.yaml -n job-portal
-          
-          # Deploy Ingress routing rules
-          kubectl --kubeconfig "$KUBECONFIG" apply --validate=false -f k8s/ingress.yaml -n job-portal
+          kubectl --kubeconfig "$KUBECONFIG" apply --validate=false -f k8s/configmap.yaml
+
+          # Backend only (NO mysql - using RDS)
+          kubectl --kubeconfig "$KUBECONFIG" apply --validate=false -f k8s/backend-deployment.yaml
+          kubectl --kubeconfig "$KUBECONFIG" apply --validate=false -f k8s/backend-service.yaml
+
+          # Frontend
+          kubectl --kubeconfig "$KUBECONFIG" apply --validate=false -f k8s/frontend-deployment.yaml
+          kubectl --kubeconfig "$KUBECONFIG" apply --validate=false -f k8s/frontend-service.yaml
+
+          # Ingress
+          kubectl --kubeconfig "$KUBECONFIG" apply --validate=false -f k8s/ingress.yaml
 
       - name: Verify Deployments Rollout
         if: env.SKIP_K3S_DEPLOY != 'true'
