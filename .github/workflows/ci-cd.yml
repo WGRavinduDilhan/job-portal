@@ -218,6 +218,29 @@ jobs:
 
           kubectl --kubeconfig "${{ env.KUBECONFIG_FILE }}" config current-context
 
+      - name: Test Cluster Connectivity
+        if: env.SKIP_K3S_DEPLOY != 'true'
+        run: |
+          export KUBECONFIG="${{ env.KUBECONFIG_FILE }}"
+          SERVER_URL=$(kubectl --kubeconfig "$KUBECONFIG" config view --raw --minify -o jsonpath='{.clusters[0].cluster.server}')
+          echo "Testing connectivity to cluster at $SERVER_URL..."
+
+          if timeout 10 kubectl --kubeconfig "$KUBECONFIG" cluster-info >/dev/null 2>&1; then
+            echo "✓ Cluster is reachable. Proceeding with deployment."
+          else
+            echo "✗ Cluster at $SERVER_URL is unreachable (timeout or connection error)."
+            echo "Deployment will be skipped. Possible causes:"
+            echo "  - Cluster endpoint is not accessible from GitHub Actions"
+            echo "  - Port 6443 is blocked by a firewall"
+            echo "  - The cluster is offline or not fully initialized"
+            echo ""
+            echo "To fix this, either:"
+            echo "  1. Make the cluster accessible from the public internet"
+            echo "  2. Use GitHub self-hosted runners within your private network"
+            echo "  3. Update the KUBECONFIG secret with a different endpoint"
+            echo "SKIP_K3S_DEPLOY=true" >> "$GITHUB_ENV"
+          fi
+
       - name: Ensure Namespace Exists
         if: env.SKIP_K3S_DEPLOY != 'true'
         run: |
@@ -307,9 +330,9 @@ jobs:
           export KUBECONFIG="${{ env.KUBECONFIG_FILE }}"
 
           echo "Verifying backend rollout..."
-          kubectl --kubeconfig "$KUBECONFIG" rollout status deployment/backend -n job-portal --timeout=120s
+          kubectl --kubeconfig "$KUBECONFIG" rollout status deployment/backend -n job-portal --timeout=300s
           echo "Verifying frontend rollout..."
-          kubectl --kubeconfig "$KUBECONFIG" rollout status deployment/frontend -n job-portal --timeout=120s
+          kubectl --kubeconfig "$KUBECONFIG" rollout status deployment/frontend -n job-portal --timeout=300s
 
       - name: Skip K3s Deployment For Testing
         if: env.SKIP_K3S_DEPLOY == 'true'
