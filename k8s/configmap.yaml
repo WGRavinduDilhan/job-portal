@@ -2,14 +2,15 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: jobportal-config
+  namespace: job-portal
   labels:
     app: jobportal
 data:
   SPRING_PROFILES_ACTIVE: "dev"
-  SPRING_DATASOURCE_URL: "jdbc:mysql://db:3306/job_portal?useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true"
-  SPRING_DATASOURCE_USERNAME: "root"
+  SPRING_DATASOURCE_URL: "jdbc:mysql://jobportal-db.c6b804gikjm0.us-east-1.rds.amazonaws.com:3306/job_portal?useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true"
+  SPRING_DATASOURCE_USERNAME: "admin"
   SPRING_MAIL_HOST: "smtp.gmail.com"
   SPRING_MAIL_PORT: "587"
   SPRING_MAIL_USERNAME: "dilhanwgr2002@gmail.com"
   MAIL_FROM: "dilhanwgr2002@gmail.com"
-  JOB_FRONTEND_BASE_URL: "http://localhost"
+  JOB_FRONTEND_BASE_URL: "http://44.220.118.138"

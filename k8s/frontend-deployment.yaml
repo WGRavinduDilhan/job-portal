@@ -2,11 +2,12 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
+  namespace: job-portal
   labels:
     app: jobportal
     service: frontend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: jobportal
@@ -20,7 +21,7 @@ spec:
       containers:
         - name: frontend
           image: ravindudilhan/jobportal-frontend:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
               name: http

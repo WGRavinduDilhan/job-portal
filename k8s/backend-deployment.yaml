@@ -2,11 +2,12 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backend
+  namespace: job-portal
   labels:
     app: jobportal
     service: backend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: jobportal
@@ -20,7 +21,7 @@ spec:
       containers:
         - name: backend
           image: ravindudilhan/jobportal-backend:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
               name: http
