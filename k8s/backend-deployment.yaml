@@ -80,27 +80,27 @@ spec:
                   key: JOB_FRONTEND_BASE_URL
           resources:
             requests:
-              memory: "256Mi"
+              memory: "200Mi"
               cpu: "100m"
             limits:
               memory: "768Mi"
               cpu: "500m"
           startupProbe:
             httpGet:
-              path: /actuator/health/liveness
+              path: /api/actuator/health/liveness
               port: 8080
             failureThreshold: 40
             periodSeconds: 10
           livenessProbe:
             httpGet:
-              path: /actuator/health/liveness
+              path: /api/actuator/health/liveness
               port: 8080
             initialDelaySeconds: 90
             periodSeconds: 15
             failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /actuator/health/readiness
+              path: /api/actuator/health/readiness
               port: 8080
             initialDelaySeconds: 90
             periodSeconds: 15
