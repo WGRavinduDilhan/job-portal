@@ -30,11 +30,13 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
         String base = environment.getRequiredProperty("spring.mvc.servlet.path");
         http.authorizeRequests()
             // Public endpoints (no token needed)
-            .antMatchers(base + "/applicant/signup",
+            .antMatchers(
+                         base + "/applicant/signup",
                          base + "/applicant/account/verify",
                          base + "/company/signup",
                          base + "/company/account/verify",
-                         "/actuator/**").permitAll()
+                         "/actuator/**",
+                         "/api/actuator/**").permitAll()
             // All other endpoints require authentication
             .antMatchers(base + "/applicant/**",
                          base + "/company/**",
