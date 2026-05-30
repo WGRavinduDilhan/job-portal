@@ -34,7 +34,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                          base + "/applicant/account/verify",
                          base + "/company/signup",
                          base + "/company/account/verify",
-                         base + "/actuator/**").permitAll()
+                         "/actuator/**").permitAll()
             // All other endpoints require authentication
             .antMatchers(base + "/applicant/**",
                          base + "/company/**",
