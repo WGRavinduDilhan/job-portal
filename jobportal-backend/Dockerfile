@@ -12,4 +12,10 @@ FROM eclipse-temurin:11-jre-jammy
 WORKDIR /app
 COPY --from=build /app/target/jobportal-api.jar app.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", \
+	"-Dmanagement.endpoint.health.probes.enabled=true", \
+	"-Dmanagement.health.livenessState.enabled=true", \
+	"-Dmanagement.health.readinessState.enabled=true", \
+	"-Dmanagement.endpoints.web.exposure.include=health,info", \
+	"-Dmanagement.endpoint.health.show-details=always", \
+	"-jar", "app.jar"]
