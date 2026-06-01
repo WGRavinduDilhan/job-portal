@@ -27,9 +27,8 @@ Job Portal Backend is a comprehensive RESTful API built with Spring Boot that se
 -   **Framework**: Spring Boot 3.x
 -   **Language**: Java 17+
 -   **Security**: Spring Security, JWT (jjwt)
--   **Database**: PostgreSQL (or MySQL)
--   **ORM**: Spring Data JPA, Hibernate
--   **Validation**: Jakarta Bean Validation
+-   **Database**: MySQL ( RDS )
+-   **ORM**: Spring Data JPA, Hibernat
 -   **Testing**: Spring Boot Test, JUnit 5, Mockito
 -   **Documentation**: Springdoc OpenAPI (Swagger UI)
 -   **Build Tool**: Maven
@@ -166,6 +165,7 @@ You can configure the application using environment variables or the `applicatio
 | `spring.mail.properties.mail.smtp.starttls.enable` | Enable TLS | `true` |
 
 ## 🚀 Deployment
+This platform is deploying on K3s Cluster in EC2 instance connection with RDS MySQL DB 
 
 ### Docker
 
@@ -184,6 +184,3 @@ docker run -d -p 8080:8080 \
   jobportal-backend
 ```
 
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
