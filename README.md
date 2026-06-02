@@ -2,7 +2,7 @@
 
 Job Portal Backend is a comprehensive RESTful API built with Spring Boot that serves as the backbone for a modern job board platform. It handles user authentication, job postings, application management, and various administrative operations.
 
-## 🚀 Features
+##  Features
 
 -   **Authentication & Authorization**:
     -   Secure user registration and login with **JWT (JSON Web Tokens)**.
@@ -22,7 +22,7 @@ Job Portal Backend is a comprehensive RESTful API built with Spring Boot that se
 -   **Notifications**:
     -   Email notifications for account verification, job applications, and status updates.
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 -   **Framework**: Spring Boot 3.x
 -   **Language**: Java 17+
@@ -34,7 +34,7 @@ Job Portal Backend is a comprehensive RESTful API built with Spring Boot that se
 -   **Build Tool**: Maven
 -   **Dev Tools**: Spring Boot DevTools
 
-## 📂 Project Structure
+## Project Structure
 
 The project follows a standard Spring Boot layered architecture:
 
@@ -52,7 +52,7 @@ src/main/java/
     └── JobPortalBackendApplication.java
 ```
 
-## 🔌 API Endpoints
+## API Endpoints
 
 ### Authentication
 -   `POST /api/auth/register` - Register a new user
@@ -81,7 +81,7 @@ src/main/java/
 -   `GET /api/applications/{id}` - Get application details
 -   `PUT /api/applications/{id}/status` - Update application status (Company)
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 -   Java 17 or higher
@@ -134,7 +134,7 @@ Once the application is running, you can access the interactive API documentatio
 -   **Swagger UI**: `http://localhost:8080/swagger-ui/index.html`
 -   **API Docs (YAML)**: `http://localhost:8080/v3/api-docs`
 
-## 🛡️ Security
+## Security
 
 The backend uses Spring Security with JWT for authentication:
 
@@ -145,7 +145,7 @@ The backend uses Spring Security with JWT for authentication:
     ```
 3.  The token expires in 24 hours.
 
-## 🔧 Configuration
+## Configuration
 
 You can configure the application using environment variables or the `application.properties` file:
 
@@ -164,7 +164,7 @@ You can configure the application using environment variables or the `applicatio
 | `spring.mail.properties.mail.smtp.auth` | Enable SMTP authentication | `true` |
 | `spring.mail.properties.mail.smtp.starttls.enable` | Enable TLS | `true` |
 
-## 🚀 Deployment
+##  Deployment
 This platform is deploying on K3s Cluster in EC2 instance connection with RDS MySQL DB 
 
 ### Docker
