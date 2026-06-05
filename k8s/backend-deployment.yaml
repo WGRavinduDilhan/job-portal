@@ -88,20 +88,20 @@ spec:
               cpu: "500m"
           startupProbe:
             httpGet:
-              path: /api/actuator/health/liveness
+              path: /api/v1/actuator/health/liveness
               port: 8080
             failureThreshold: 40
             periodSeconds: 10
           livenessProbe:
             httpGet:
-              path: /api/actuator/health/liveness
+              path: /api/v1/actuator/health/liveness
               port: 8080
             initialDelaySeconds: 90
             periodSeconds: 15
             failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /api/actuator/health/readiness
+              path: /api/v1/actuator/health/readiness
               port: 8080
             initialDelaySeconds: 90
             periodSeconds: 15
