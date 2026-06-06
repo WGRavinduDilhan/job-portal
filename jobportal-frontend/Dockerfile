@@ -2,7 +2,10 @@
 FROM node:18-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json* ./
-RUN npm install
+ENV npm_config_fetch_retries=5
+ENV npm_config_fetch_retry_factor=2
+ENV npm_config_fetch_retry_maxtimeout=120000
+RUN npm ci --no-audit --no-fund
 COPY . .
 # Pass the API URL as a build argument
 ARG REACT_APP_API_URL
