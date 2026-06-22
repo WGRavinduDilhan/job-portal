@@ -1,189 +1,140 @@
-# Job Portal - Backend REST API
+#  Full Stack Job Portal Platform
 
-Job Portal Backend is a comprehensive RESTful API built with Spring Boot that serves as the backbone for a modern job board platform. It handles user authentication, job postings, application management, and various administrative operations.
+A comprehensive, modern job board platform built with a microservices-inspired architecture. This repository contains the entire stack: a React frontend, a Spring Boot REST API backend, and full infrastructure configurations including Docker Compose for local development and Kubernetes manifests for production deployment.
 
-## 🚀 Features
+##  System Architecture
 
--   **Authentication & Authorization**:
-    -   Secure user registration and login with **JWT (JSON Web Tokens)**.
-    -   **Password Encryption** using Spring Security.
-    -   Role-based access control (Admin, Company, Candidate).
--   **Job Management**:
-    -   CRUD operations for job postings.
-    -   Advanced filtering and searching (by category, location, salary range, job type).
-    -   Job status tracking (OPEN, CLOSED).
--   **Application Tracking**:
-    -   Candidates can apply for jobs.
-    -   Companies can review and manage applications.
-    -   Application status workflow (APPLIED, SHORTLISTED, REJECTED, OFFERED).
--   **User Management**:
-    -   Profile management for Candidates and Companies.
-    -   Account activation/deactivation.
--   **Notifications**:
-    -   Email notifications for account verification, job applications, and status updates.
+The application is composed of the following main components:
 
-## 🛠️ Tech Stack
+-   **Frontend**: A responsive single-page application built with React and Bootstrap.
+-   **Backend**: A robust RESTful API built with Java and Spring Boot.
+-   **Database**: MySQL database for persistent data storage.
+-   **Infrastructure**: Fully containerized using Docker, with Kubernetes (k8s) manifests for cluster deployment, and GitHub Actions for CI/CD.
 
--   **Framework**: Spring Boot 3.x
--   **Language**: Java 17+
--   **Security**: Spring Security, JWT (jjwt)
--   **Database**: PostgreSQL (or MySQL)
--   **ORM**: Spring Data JPA, Hibernate
--   **Validation**: Jakarta Bean Validation
--   **Testing**: Spring Boot Test, JUnit 5, Mockito
+## Features
+
+-   **Authentication & Authorization**: Secure JWT-based authentication with role-based access control (Admin, Company, Candidate).
+-   **Candidate Portal**: Browse jobs, apply for positions, and track application status.
+-   **Company Portal**: Post jobs, manage listings, and review candidate applications.
+-   **Advanced Filtering**: Search for jobs by category, location, and salary range.
+-   **Dashboard & Analytics**: Visual data representation using Recharts (Frontend).
+-   **Security Scanning**: Integrated Trivy security scanning for filesystem and container images.
+
+##  Tech Stack
+
+### Frontend (`/jobportal-frontend`)
+-   **Framework**: React 18
+-   **Styling**: Bootstrap 5, React Bootstrap
+-   **Routing**: React Router DOM
+-   **HTTP Client**: Axios
+-   **Charts**: Recharts
+-   **Testing**: React Testing Library
+
+### Backend (`/jobportal-backend`)
+-   **Framework**: Spring Boot 3.x (Java 11/17)
+-   **Security**: Spring Security, JWT (JSON Web Tokens)
+-   **Database / ORM**: MySQL 8.0, Spring Data JPA, Hibernate
 -   **Documentation**: Springdoc OpenAPI (Swagger UI)
--   **Build Tool**: Maven
--   **Dev Tools**: Spring Boot DevTools
+-   **Testing**: JUnit 5, Mockito
 
-## 📂 Project Structure
+### DevOps & Infrastructure
+-   **Containerization**: Docker, Docker Compose
+-   **Orchestration**: Kubernetes (K3s compatible manifests in `/k8s`)
+-   **CI/CD**: GitHub Actions
+-   **Security**: Trivy Vulnerability Scanner
 
-The project follows a standard Spring Boot layered architecture:
+## Repository Structure
 
+```text
+.
+├── jobportal-backend/       # Spring Boot application, REST API
+├── jobportal-frontend/      # React single-page application
+├── k8s/                     # Kubernetes deployment, service, ingress, and config manifests
+├── .github/workflows/       # GitHub Actions CI/CD pipeline definitions
+├── docker-compose.yml       # Local development orchestration
+└── README.md                # Project documentation
 ```
-src/main/java/
-└── com/jobportal/
-    ├── config/        # Security configurations, CORS, AppConfig
-    ├── controller/    # REST API endpoints (Auth, User, Company, Job, etc.)
-    ├── dto/           # Data Transfer Objects (Request/Response models)
-    ├── entity/        # JPA Entities (Database Models)
-    ├── exception/     # Custom Exception Classes
-    ├── repository/    # Spring Data JPA Repositories
-    ├── service/       # Business Logic Layer
-    ├── util/          # Utility classes (JwtUtils, EmailUtils)
-    └── JobPortalBackendApplication.java
-```
 
-## 🔌 API Endpoints
-
-### Authentication
--   `POST /api/auth/register` - Register a new user
--   `POST /api/auth/login` - Authenticate and get JWT token
--   `GET /api/auth/me` - Get current user profile
-
-### Users
--   `PUT /api/users/me` - Update current user profile
--   `GET /api/users/me` - Get current user
-
-### Companies
--   `POST /api/companies/register` - Register a new company
--   `GET /api/companies/{id}` - Get company details
--   `PUT /api/companies/{id}` - Update company profile
-
-### Jobs
--   `POST /api/jobs` - Create a new job (Company)
--   `GET /api/jobs` - Get all jobs (with filters)
--   `GET /api/jobs/{id}` - Get job by ID
--   `PUT /api/jobs/{id}` - Update job (Company)
--   `DELETE /api/jobs/{id}` - Delete job (Company)
-
-### Applications
--   `POST /api/applications` - Apply for a job (Candidate)
--   `GET /api/applications` - Get my applications (Candidate) / Get all applications for a job (Company)
--   `GET /api/applications/{id}` - Get application details
--   `PUT /api/applications/{id}/status` - Update application status (Company)
-
-## 🚀 Getting Started
+##  Getting Started (Local Development)
 
 ### Prerequisites
--   Java 17 or higher
--   Maven 3.6 or higher
--   PostgreSQL database
+-   [Docker](https://www.docker.com/products/docker-desktop) and Docker Compose
+-   Node.js 18+ (for manual frontend setup)
+-   Java 11+ and Maven (for manual backend setup)
 
-### Installation
+### Option 1: Running with Docker Compose (Recommended)
+
+The easiest way to get the entire stack running locally is using Docker Compose. It will spin up the MySQL database, the Spring Boot backend, and the React frontend.
 
 1.  Clone the repository:
     ```bash
     git clone <repository-url>
-    cd jobportal-backend
+    cd job-portal
     ```
 
-2.  Configure the database:
-    Update `src/main/resources/application.properties` with your database credentials:
-    ```properties
-    spring.datasource.url=jdbc:postgresql://localhost:5432/jobportal
-    spring.datasource.username=postgres
-    spring.datasource.password=your_password
-    ```
-
-3.  Run the application:
+2.  Start the services:
     ```bash
-    mvn spring-boot:run
+    docker-compose up --build -d
     ```
 
-### Database Schema
+3.  Access the applications:
+    -   **Frontend UI**: [http://localhost:3000](http://localhost:3000)
+    -   **Backend API**: [http://localhost:8080](http://localhost:8080)
+    -   **Swagger API Docs**: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
 
-The application uses Spring Data JPA to automatically create and update database tables based on the entity models. The schema includes tables such as:
+### Option 2: Manual Local Setup
 
--   `users`
--   `companies`
--   `jobs`
--   `applications`
--   `roles`
--   `tokens`
+<details>
+<summary>Click to expand manual setup instructions</summary>
 
-### Testing
+**1. Database Setup**
+Start a local MySQL server (or run it via docker) and create a database named `job_portal`.
 
-Run the test suite to ensure everything is working correctly:
+**2. Backend Setup**
 ```bash
-mvn test
+cd jobportal-backend
+mvn clean install
+mvn spring-boot:run
+```
+*Note: Ensure your database credentials in `src/main/resources/application.properties` or environment variables match your local setup.*
+
+**3. Frontend Setup**
+```bash
+cd jobportal-frontend
+npm install
+npm start
+```
+</details>
+
+## CI/CD & Deployment
+
+This project utilizes GitHub Actions for Continuous Integration and Continuous Deployment (`.github/workflows/ci-cd.yml`).
+
+**The Pipeline automatically:**
+1.  **Builds & Tests**: Compiles Java code, builds React app, and runs automated tests.
+2.  **Security Scans**: Uses Trivy to scan the codebase and built Docker images for vulnerabilities.
+3.  **Builds Images**: Builds Docker images for the frontend and backend and pushes them to Docker Hub.
+4.  **Deploys to Kubernetes**: Applies the manifests in the `/k8s` directory to a K3s cluster.
+
+### Kubernetes Setup (`/k8s`)
+The project includes ready-to-use Kubernetes manifests for:
+-   Namespaces and ConfigMaps
+-   Backend and Frontend Deployments & Services
+-   Ingress rules for routing
+-   Secret templates for sensitive credentials
+
+To deploy manually to an existing cluster:
+```bash
+kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/configmap.yaml
+# Ensure you configure your secrets before applying deployments
+kubectl apply -f k8s/
 ```
 
-### API Documentation
 
-Once the application is running, you can access the interactive API documentation (Swagger UI) at:
+Currently in Deployment phrase and still cheking code qualities in order to make it 100% secure and working with all features as expected 
 
--   **Swagger UI**: `http://localhost:8080/swagger-ui/index.html`
--   **API Docs (YAML)**: `http://localhost:8080/v3/api-docs`
+### Stuck points
 
-## 🛡️ Security
+Currently having problem in AWS deployment side.......
 
-The backend uses Spring Security with JWT for authentication:
-
-1.  Upon successful login, a JWT token is issued.
-2.  This token must be included in the `Authorization` header for protected endpoints:
-    ```
-    Authorization: Bearer <your-jwt-token>
-    ```
-3.  The token expires in 24 hours.
-
-## 🔧 Configuration
-
-You can configure the application using environment variables or the `application.properties` file:
-
-| Property | Description | Default |
-|----------|-------------|---------|
-| `server.port` | Port number for the server | `8080` |
-| `spring.datasource.url` | Database connection URL | Varies |
-| `spring.datasource.username` | Database username | `postgres` |
-| `spring.datasource.password` | Database password | `your_password` |
-| `app.jwt-secret` | JWT secret key | `supersecretkey` |
-| `app.jwt-expiration-ms` | Token expiration time in milliseconds | `86400000` (1 day) |
-| `spring.mail.host` | SMTP server host | `smtp.gmail.com` |
-| `spring.mail.port` | SMTP server port | `587` |
-| `spring.mail.username` | Email account username | Varies |
-| `spring.mail.password` | Email account password | Varies |
-| `spring.mail.properties.mail.smtp.auth` | Enable SMTP authentication | `true` |
-| `spring.mail.properties.mail.smtp.starttls.enable` | Enable TLS | `true` |
-
-## 🚀 Deployment
-
-### Docker
-
-Create a Docker image:
-```bash
-docker build -t jobportal-backend .
-```
-
-Run the container:
-```bash
-docker run -d -p 8080:8080 \
-  -e DB_URL="jdbc:postgresql://localhost:5432/jobportal" \
-  -e DB_USERNAME="postgres" \
-  -e DB_PASSWORD="your_password" \
-  --name jobportal-backend \
-  jobportal-backend
-```
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
