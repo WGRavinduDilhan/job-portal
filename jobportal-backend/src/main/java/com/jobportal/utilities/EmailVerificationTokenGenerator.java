@@ -8,6 +8,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -19,12 +20,14 @@ public class EmailVerificationTokenGenerator {
     private static final Logger log = LoggerFactory.getLogger(EmailVerificationTokenGenerator.class);
 
     private final DateGenerator dateGenerator;
+    private final String secret;
 
-    public EmailVerificationTokenGenerator(DateGenerator dateGenerator) {
+    public EmailVerificationTokenGenerator(DateGenerator dateGenerator,
+                                           @Value("${jobportal.jwt.email-verification-secret}") String secret) {
         this.dateGenerator = dateGenerator;
+        this.secret = secret;
     }
 
-    private static final String SECRET = "AIsanifM4hK0sMK2ahi8KRp1zhiAX18b654051rLK51it0m4y19932612a92vA3Ws8Q14381Kth5asMn0pm5";
     public static final String EMAIL_CLAIM = "email";
 
 
@@ -44,7 +47,7 @@ public class EmailVerificationTokenGenerator {
     public String generate(long userId, String email) {
 
         Date issued = new Date();
-        SecretKey secretKey = Keys.hmacShaKeyFor((SECRET).getBytes());
+        SecretKey secretKey = Keys.hmacShaKeyFor((secret).getBytes());
 
         return Jwts.builder()
                 .setIssuer("jobportal")
@@ -57,7 +60,7 @@ public class EmailVerificationTokenGenerator {
     }
 
     public Jws<Claims> verify(String auth) {
-        SecretKey secretKey = Keys.hmacShaKeyFor((SECRET).getBytes());
+        SecretKey secretKey = Keys.hmacShaKeyFor((secret).getBytes());
         return getClaimsJws(auth, secretKey);
     }
 

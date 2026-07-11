@@ -16,7 +16,6 @@ public class SecurityConstants {
     protected static final String SCOPE_READ          = "read";
     protected static final String SCOPE_WRITE         = "write";
     protected static final String TRUST               = "trust";
-    protected static final String TOKEN_SIGN_IN_KEY   = "jobportal_secret_key_2024_secure_token";
 
     public static final  String HEADER_AUTH = "Authorization";
 }

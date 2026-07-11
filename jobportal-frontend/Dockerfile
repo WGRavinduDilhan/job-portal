@@ -7,9 +7,13 @@ ENV npm_config_fetch_retry_factor=2
 ENV npm_config_fetch_retry_maxtimeout=120000
 RUN npm ci --no-audit --no-fund
 COPY . .
-# Pass the API URL as a build argument
+# Pass the API URL and client secrets as build arguments
 ARG REACT_APP_API_URL
 ENV REACT_APP_API_URL=${REACT_APP_API_URL}
+ARG REACT_APP_APPLICANT_SECRET
+ENV REACT_APP_APPLICANT_SECRET=${REACT_APP_APPLICANT_SECRET}
+ARG REACT_APP_COMPANY_SECRET
+ENV REACT_APP_COMPANY_SECRET=${REACT_APP_COMPANY_SECRET}
 RUN npm run build
 
 # Stage 2: Serve the application with Nginx

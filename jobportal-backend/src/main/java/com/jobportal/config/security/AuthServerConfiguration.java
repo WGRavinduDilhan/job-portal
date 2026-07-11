@@ -3,6 +3,7 @@ package com.jobportal.config.security;
 import com.jobportal.config.security.custom.*;
 import com.jobportal.service.authService.UserService;
 import org.springframework.context.annotation.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,6 +27,15 @@ public class AuthServerConfiguration extends AuthorizationServerConfigurerAdapte
     private final CustomTokenEnhancer customTokenEnhancer;
     private final Environment environment;
 
+    @Value("${jobportal.jwt.secret}")
+    private String jwtSecret;
+
+    @Value("${jobportal.oauth2.applicant-client-secret}")
+    private String applicantClientSecret;
+
+    @Value("${jobportal.oauth2.company-client-secret}")
+    private String companyClientSecret;
+
     public AuthServerConfiguration(AuthenticationManager authenticationManager, PasswordEncoder passwordEncoder, UserService userDetailsService, CustomTokenEnhancer customTokenEnhancer, Environment environment) {
         this.authenticationManager = authenticationManager;
         this.passwordEncoder = passwordEncoder;
@@ -39,7 +49,7 @@ public class AuthServerConfiguration extends AuthorizationServerConfigurerAdapte
         configurer.inMemory()
             // APPLICANT client
             .withClient(APPLICANT_ID)
-            .secret(passwordEncoder.encode("password"))
+            .secret(passwordEncoder.encode(applicantClientSecret))
             .authorizedGrantTypes(GRANT_TYPE_PASSWORD, AUTHORIZATION_CODE, REFRESH_TOKEN, IMPLICIT)
             .scopes(SCOPE_READ, SCOPE_WRITE, TRUST)
             .accessTokenValiditySeconds(APPLICANT_ACCESS_TOKEN_VALIDITY_SECONDS)
@@ -47,7 +57,7 @@ public class AuthServerConfiguration extends AuthorizationServerConfigurerAdapte
             .and()
             // COMPANY client
             .withClient(COMPANY_ID)
-            .secret(passwordEncoder.encode("password"))
+            .secret(passwordEncoder.encode(companyClientSecret))
             .authorizedGrantTypes(GRANT_TYPE_PASSWORD, AUTHORIZATION_CODE, REFRESH_TOKEN, IMPLICIT)
             .scopes(SCOPE_READ, SCOPE_WRITE, TRUST)
             .accessTokenValiditySeconds(COMPANY_ACCESS_TOKEN_VALIDITY_SECONDS)
@@ -69,7 +79,7 @@ public class AuthServerConfiguration extends AuthorizationServerConfigurerAdapte
     @Bean
     public JwtAccessTokenConverter accessTokenConverter() {
         JwtAccessTokenConverter c = new JwtAccessTokenConverter();
-        c.setSigningKey(TOKEN_SIGN_IN_KEY);
+        c.setSigningKey(jwtSecret);
         return c;
     }
 

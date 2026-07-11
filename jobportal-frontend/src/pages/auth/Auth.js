@@ -31,7 +31,11 @@ export default function Auth() {
     data.append('password', password);
     data.append('grant_type', 'password');
     
-    const clientKey = role === 'COMPANY' ? 'Y29tcGFueTpwYXNzd29yZA==' : 'YXBwbGljYW50OnBhc3N3b3Jk';
+    const applicantSecret = process.env.REACT_APP_APPLICANT_SECRET || 'local-applicant-secret';
+    const companySecret = process.env.REACT_APP_COMPANY_SECRET || 'local-company-secret';
+    const clientKey = role === 'COMPANY' 
+      ? btoa(`company:${companySecret}`) 
+      : btoa(`applicant:${applicantSecret}`);
     
     try {
       const res = await axios.post(`${BASE_URL}/oauth/token`, data, {

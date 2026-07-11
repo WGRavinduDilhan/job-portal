@@ -175,6 +175,10 @@ jobs:
           tags: |
             ravindudilhan/jobportal-frontend:latest
             ravindudilhan/jobportal-frontend:${{ github.sha }}
+          build-args: |
+            REACT_APP_API_URL=http://44.220.118.138/api/v1
+            REACT_APP_APPLICANT_SECRET=${{ secrets.REACT_APP_APPLICANT_SECRET }}
+            REACT_APP_COMPANY_SECRET=${{ secrets.REACT_APP_COMPANY_SECRET }}
 
   deploy-to-k3s:
     needs: [docker-push]
@@ -255,6 +259,9 @@ jobs:
           RDSDB_PASSWORD: ${{ secrets.RDSDB_PASSWORD }}
           MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          EMAIL_VERIFICATION_SECRET: ${{ secrets.EMAIL_VERIFICATION_SECRET }}
+          APPLICANT_CLIENT_SECRET: ${{ secrets.APPLICANT_CLIENT_SECRET }}
+          COMPANY_CLIENT_SECRET: ${{ secrets.COMPANY_CLIENT_SECRET }}
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_USERNAME: ${{ secrets.DB_USERNAME }}
           RDSDB_USERNAME: ${{ secrets.RDSDB_USERNAME }}
@@ -276,6 +283,9 @@ jobs:
 
           MAIL_PW_VALUE="${MAIL_PASSWORD:-placeholder}"
           JWT_SECRET_VALUE="${JWT_SECRET:-supersecretkey}"
+          EMAIL_VERIFICATION_SECRET_VALUE="${EMAIL_VERIFICATION_SECRET:-placeholder}"
+          APPLICANT_CLIENT_SECRET_VALUE="${APPLICANT_CLIENT_SECRET:-local-applicant-secret}"
+          COMPANY_CLIENT_SECRET_VALUE="${COMPANY_CLIENT_SECRET:-local-company-secret}"
           DB_HOST_VALUE="${DB_HOST:-db}"
           DB_USERNAME_VALUE="$DB_USERNAME"
           if [ -z "$DB_USERNAME_VALUE" ]; then
@@ -289,6 +299,9 @@ jobs:
             --from-literal=mysql-root-password="$ROOT_PW" \
             --from-literal=mail-password="$MAIL_PW_VALUE" \
             --from-literal=jwt-secret="$JWT_SECRET_VALUE" \
+            --from-literal=email-verification-secret="$EMAIL_VERIFICATION_SECRET_VALUE" \
+            --from-literal=applicant-client-secret="$APPLICANT_CLIENT_SECRET_VALUE" \
+            --from-literal=company-client-secret="$COMPANY_CLIENT_SECRET_VALUE" \
             --from-literal=DB_HOST="$DB_HOST_VALUE" \
             --from-literal=DB_USERNAME="$DB_USERNAME_VALUE" \
             --from-literal=DB_PASSWORD="$ROOT_PW" \

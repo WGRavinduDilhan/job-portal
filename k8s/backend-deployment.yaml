@@ -79,6 +79,26 @@ spec:
                 configMapKeyRef:
                   name: jobportal-config
                   key: JOB_FRONTEND_BASE_URL
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jobportal-secrets
+                  key: jwt-secret
+            - name: EMAIL_VERIFICATION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jobportal-secrets
+                  key: email-verification-secret
+            - name: APPLICANT_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jobportal-secrets
+                  key: applicant-client-secret
+            - name: COMPANY_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jobportal-secrets
+                  key: company-client-secret
           resources:
             requests:
               memory: "200Mi"
