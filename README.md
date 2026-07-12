@@ -9,7 +9,7 @@ The application is composed of the following main components:
 -   **Frontend**: A responsive single-page application built with React and Bootstrap.
 -   **Backend**: A robust RESTful API built with Java and Spring Boot.
 -   **Database**: MySQL database for persistent data storage.
--   **Infrastructure**: Fully containerized using Docker, with Kubernetes (k8s) manifests for cluster deployment, and GitHub Actions for CI/CD.
+-   **Infrastructure**: Fully containerized using Docker, with Lightweight Kubernetes (k3s) kubernets manifests for cluster deployment, and GitHub Actions for CI/CD.
 
 ## Features
 
@@ -35,7 +35,7 @@ The application is composed of the following main components:
 -   **Security**: Spring Security, JWT (JSON Web Tokens)
 -   **Database / ORM**: MySQL 8.0, Spring Data JPA, Hibernate
 -   **Documentation**: Springdoc OpenAPI (Swagger UI)
--   **Testing**: JUnit 5, Mockito
+-   **Testing**: JUnit 5, Mockit
 
 ### DevOps & Infrastructure
 -   **Containerization**: Docker, Docker Compose
