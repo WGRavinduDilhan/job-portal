@@ -14,6 +14,16 @@ const STATUS_COLOR = {
 const API = process.env.REACT_APP_API_URL;
 const authHeader = () => ({ Authorization: `Bearer ${localStorage.getItem('ACCESS_TOKEN')}` });
 
+// S7044 / S8476 — Validate IDs before using them in URLs (prevents path traversal / SSRF)
+const sanitizeApplicationId = (id) => {
+  const parsed = parseInt(id, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+};
+
+// S2004 — Named helper to avoid deep nesting inside .then() callback
+const buildStatusUpdater = (applicationId, newStatus) => (prev) =>
+  prev.map(a => (a.id === applicationId ? { ...a, status: newStatus } : a));
+
 export default function ApplicantPipeline() {
   const { jobId } = useParams();
   const navigate = useNavigate();
@@ -53,10 +63,17 @@ export default function ApplicantPipeline() {
   // Core status update — called after modals are confirmed
   // ─────────────────────────────────────────────────────────────
   const submitStatusUpdate = (applicationId, payload) => {
+    // S7044 / S8476: validate ID is a safe positive integer before using in URL
+    const safeId = sanitizeApplicationId(applicationId);
+    if (!safeId) {
+      toast.error('Invalid application reference.');
+      return;
+    }
     setSubmitting(true);
-    axios.patch(`${API}/company/applications/${applicationId}/status`, payload, { headers: authHeader() })
+    axios.patch(`${API}/company/applications/${safeId}/status`, payload, { headers: authHeader() })
       .then(() => {
-        setApplicants(prev => prev.map(a => a.id === applicationId ? { ...a, status: payload.status } : a));
+        // S2004: use named helper instead of deeply nested inline arrow function
+        setApplicants(buildStatusUpdater(applicationId, payload.status));
         toast.success(`Status updated to ${payload.status.replace('_', ' ')}`);
       })
       .catch(() => toast.error('Failed to update status'))
