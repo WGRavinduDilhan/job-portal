@@ -13,4 +13,4 @@ data:
   SPRING_MAIL_PORT: "587"
   SPRING_MAIL_USERNAME: "dilhanwgr2002@gmail.com"
   MAIL_FROM: "dilhanwgr2002@gmail.com"
-  JOB_FRONTEND_BASE_URL: "http://44.220.118.138"
+  JOB_FRONTEND_BASE_URL: "http://jobs-portal.duckdns.org"

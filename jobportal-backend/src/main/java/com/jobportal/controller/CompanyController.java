@@ -54,7 +54,7 @@ public class CompanyController {
             @RequestHeader(SecurityConstants.HEADER_AUTH) String token,
             @PathVariable Long applicationId,
             @RequestBody StatusUpdateReqDto dto) {
-        jobService.updateApplicationStatus(applicationId, dto.getStatus());
+        jobService.updateApplicationStatus(applicationId, dto);
         return ResponseEntity.ok(new CommonResponse<>(true, "Status updated"));
     }
 
