@@ -38,3 +38,7 @@ Desktop.ini
 # Kubernetes Secrets
 k8s/secrets.yaml
 
+
+# Local secrets — never commit
+.env
+.env.local

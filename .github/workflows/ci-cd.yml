@@ -176,7 +176,7 @@ jobs:
             ravindudilhan/jobportal-frontend:latest
             ravindudilhan/jobportal-frontend:${{ github.sha }}
           build-args: |
-            REACT_APP_API_URL=http://44.220.118.138/api/v1
+            REACT_APP_API_URL=http://jobs-portal.duckdns.org/api/v1
             REACT_APP_APPLICANT_SECRET=${{ secrets.REACT_APP_APPLICANT_SECRET }}
             REACT_APP_COMPANY_SECRET=${{ secrets.REACT_APP_COMPANY_SECRET }}
 

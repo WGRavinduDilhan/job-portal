@@ -29,6 +29,15 @@ public class Application {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedDate;
 
+    // Interview scheduling fields (populated when status = INTERVIEW_SCHEDULED)
+    private String interviewDate;
+    private String interviewTime;
+    private String interviewType;   // ONLINE or IN_PERSON
+
+    // Custom company message (used for INTERVIEW_SCHEDULED and OFFERED)
+    @Lob
+    private String companyMessage;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private Applicant applicant;
@@ -37,3 +46,4 @@ public class Application {
     @JoinColumn(nullable = false)
     private JobListing jobListing;
 }
+
