@@ -39,6 +39,22 @@ Desktop.ini
 k8s/secrets.yaml
 
 
-# Local secrets — never commit
+# Local secrets - never commit
 .env
 .env.local
+
+# SSH Keys
+*.pem
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
